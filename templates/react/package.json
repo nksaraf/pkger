@@ -1,0 +1,44 @@
+{
+  "name": "{{pkgname}}",
+  "author": "{{author}}",
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": "dist/{{pkgname}}.js",
+  "module": "dist/{{pkgname}}.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "prepare": "yarn build"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "*",
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "react": "*",
+    "react-dom": "*",
+    "next": "*",
+    "@types/next": "*"
+  },
+  "peerDependencies": {
+    "react": ">=16"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  }
+}

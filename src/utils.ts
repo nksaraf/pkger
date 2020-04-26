@@ -48,6 +48,14 @@ export function getReactVersion({
   );
 }
 
-export function getNodeEngineRequirement({ engines }: PackageJson) {
-  return engines && engines.node;
-}
+export const isDir = (name: string) =>
+  fs
+    .stat(name)
+    .then(stats => stats.isDirectory())
+    .catch(() => false);
+
+export const isFile = (name: string) =>
+  fs
+    .stat(name)
+    .then(stats => stats.isFile())
+    .catch(() => false);
