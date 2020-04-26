@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { CLIEngine } from 'eslint';
-import { PackageJson } from './types';
-import { getReactVersion } from './utils';
+import { PackageJson } from '../src/types';
+import { getReactVersion } from '../src/utils';
 
 interface CreateEslintConfigArgs {
   pkg: PackageJson;

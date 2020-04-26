@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import logError from './logError';
 import path from 'path';
 import execa from 'execa';
 import fs from 'fs-extra';
@@ -11,7 +10,7 @@ import semver from 'semver';
 import { Input, Select } from 'enquirer';
 import { templates } from './templates';
 import * as Output from './output';
-import { isDir } from './utils';
+import { isDir, logError } from './utils';
 import { PackageJson } from './types';
 import { headerVert } from './header';
 

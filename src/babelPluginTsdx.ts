@@ -10,7 +10,7 @@ export const isTruthy = (obj?: any) => {
   return obj.constructor !== Object || Object.keys(obj).length > 0;
 };
 
-const replacements = [{ original: 'lodash', replacement: 'lodash-es' }];
+// const replacements = [{ original: 'lodash', replacement: 'lodash-es' }];
 
 export const mergeConfigItems = (type: any, ...configItemsToMerge: any[]) => {
   const mergedItems: any[] = [];
@@ -69,10 +69,10 @@ export const babelPluginTsdx = babelPlugin.custom(() => ({
         // },
         { name: 'babel-plugin-annotate-pure-calls' },
         { name: 'babel-plugin-dev-expression' },
-        customOptions.format !== 'cjs' && {
-          name: 'babel-plugin-transform-rename-import',
-          replacements,
-        },
+        // customOptions.format !== 'cjs' && {
+        //   name: 'babel-plugin-transform-rename-import',
+        //   replacements,
+        // },
         {
           name: 'babel-plugin-transform-async-to-promises',
           inlineHelpers: true,
@@ -93,9 +93,9 @@ export const babelPluginTsdx = babelPlugin.custom(() => ({
         {
           name: 'babel-plugin-macros',
         },
-        isTruthy(customOptions.extractErrors) && {
-          name: './errors/transformErrorMessages',
-        },
+        // isTruthy(customOptions.extractErrors) && {
+        //   name: './errors/transformErrorMessages',
+        // },
       ].filter(Boolean)
     );
 
