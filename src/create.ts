@@ -101,20 +101,33 @@ const incorrectNodeVersionMessage = function(requiredVersion: string) {
 };
 
 export async function create(pkg: string, opts: any) {
-  //     console.log(
-  //       chalk.blue(`
-  // ::::::::::: ::::::::  :::::::::  :::    :::
-  //     :+:    :+:    :+: :+:    :+: :+:    :+:
-  //     +:+    +:+        +:+    +:+  +:+  +:+
-  //     +#+    +#++:++#++ +#+    +:+   +#++:+
-  //     +#+           +#+ +#+    +#+  +#+  +#+
-  //     #+#    #+#    #+# #+#    #+# #+#    #+#
-  //     ###     ########  #########  ###    ###
-  // `)
-  // );
-
+  console.log(
+    chalk.blue(`
+              ____.----.
+    ____.----'          \\
+    \\                    \\
+     \\                    \\
+      \\                    \\
+       \\          ____.----'\`--.__
+        \\___.----'          |     \`--.____
+       /\`-._                |       __.-' \\
+      /     \`-._            ___.---'       \\
+     /          \`-.____.---'                \\
+    /            / | \\                       \\
+   /            /  |  \\                   _.--'
+   \`-.         /   |   \\            __.--'
+      \`-._    /    |    \\     __.--'     |
+        | \`-./     |     \\_.-'           |
+        |          |                     |
+ _______|          |                     |______
+        \`-.        |                  _.-'
+           \`-.     |           __..--'
+              \`-.  |      __.-'
+                 \`-|__.--'
+  `)
+  );
+  const bootSpinner = ora(`Creating ${chalk.bold.green(pkg)}...`);
   try {
-    const bootSpinner = ora(`Creating ${chalk.bold.green(pkg)}...`);
     const cwd = await fs.realpath(process.cwd());
     pkg = await createUniqueProjectName(cwd, pkg, bootSpinner);
     let template = await getTemplate(opts, bootSpinner);
@@ -124,6 +137,7 @@ export async function create(pkg: string, opts: any) {
     await copyTemplate(template, cwd, pkg, bootSpinner);
     console.log(await startMessage(pkg));
   } catch (error) {
+    bootSpinner.fail(`Failed to create ${pkg}`);
     logError(error);
     process.exit(1);
   }
