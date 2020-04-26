@@ -13,6 +13,7 @@ import { templates } from './templates';
 import * as Output from './output';
 import { isDir } from './utils';
 import { PackageJson } from './types';
+import { headerVert } from './header';
 
 export let pkgManager: PackageManager;
 
@@ -73,13 +74,13 @@ const startMessage = async function(projectName: string) {
   
   To build for production:
     ${Output.cmd(commands.build)}
-
-  To test your library with Jest:
-    ${Output.cmd(commands.test)}
-    
-  Questions? Feedback? Please let me know!
-  ${chalk.green('https://github.com/jaredpalmer/tsdx/issues')}
 `;
+
+  // To test your library with Jest:
+  // ${Output.cmd(commands.test)}
+
+  // Questions? Feedback? Please let me know!
+  // ${chalk.green('https://github.com/nksaraf/pkger/issues')}
 };
 
 const installingMessage = function(packages: string[]) {
@@ -101,39 +102,13 @@ const incorrectNodeVersionMessage = function(requiredVersion: string) {
 };
 
 export async function create(pkg: string, opts: any) {
-  console.log(
-    chalk.blue(`
-              ____.----.
-    ____.----'          \\
-    \\                    \\
-     \\                    \\
-      \\                    \\
-       \\          ____.----'\`--.__
-        \\___.----'          |     \`--.____
-       /\`-._                |       __.-' \\
-      /     \`-._            ___.---'       \\
-     /          \`-.____.---'                \\
-    /            / | \\                       \\
-   /            /  |  \\                   _.--'
-   \`-.         /   |   \\            __.--'
-      \`-._    /    |    \\     __.--'     |
-        | \`-./     |     \\_.-'           |
-        |          |                     |
- _______|          |                     |______
-        \`-.        |                  _.-'
-           \`-.     |           __..--'
-              \`-.  |      __.-'
-                 \`-|__.--'
-  `)
-  );
+  console.log(chalk.red(headerVert));
   const bootSpinner = ora(`Creating ${chalk.bold.green(pkg)}...`);
   try {
     const cwd = await fs.realpath(process.cwd());
     pkg = await createUniqueProjectName(cwd, pkg, bootSpinner);
     let template = await getTemplate(opts, bootSpinner);
-
     await fs.mkdirp(path.join(cwd, pkg));
-    // copy the template
     await copyTemplate(template, cwd, pkg, bootSpinner);
     console.log(await startMessage(pkg));
   } catch (error) {
