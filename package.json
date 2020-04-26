@@ -1,12 +1,12 @@
 {
-  "name": "tsdx",
-  "version": "0.13.2",
-  "author": "Jared Palmer <jared@palmer.net>",
+  "name": "pkger",
+  "version": "0.0.1",
+  "author": "Nikhil Saraf <nsaraf98@gmail.com>",
   "description": "Zero-config TypeScript package development",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jaredpalmer/tsdx.git"
+    "url": "git+https://github.com/nksaraf/pkger.git"
   },
   "keywords": [
     "react",
@@ -15,10 +15,10 @@
     "rollup"
   ],
   "bugs": {
-    "url": "https://github.com/jaredpalmer/tsdx/issues"
+    "url": "https://github.com/nksaraf/pkger/issues"
   },
   "bin": {
-    "tsdx": "./dist/index.js"
+    "pkger": "./dist/index.js"
   },
   "scripts": {
     "prepare": "tsc -p tsconfig.json",
@@ -80,6 +80,7 @@
     "jest-watch-typeahead": "^0.4.0",
     "jpjs": "^1.2.1",
     "lodash.merge": "^4.6.2",
+    "mustache": "^4.0.1",
     "ora": "^3.4.0",
     "pascal-case": "^2.0.1",
     "prettier": "^1.19.1",
@@ -100,6 +101,7 @@
   "devDependencies": {
     "@types/eslint": "^6.1.2",
     "@types/fs-extra": "^8.0.0",
+    "@types/mustache": "^4.0.1",
     "@types/node": "^13.1.0",
     "@types/react": "^16.9.11",
     "@types/rollup-plugin-json": "^3.0.2",
@@ -122,11 +124,6 @@
     "styled-components": "^5.0.1",
     "tiny-invariant": "^1.1.0",
     "tiny-warning": "^1.0.3"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged --pattern '!test/tests/lint/**' && yarn lint && doctoc README.md"
-    }
   },
   "prettier": {
     "printWidth": 80,
