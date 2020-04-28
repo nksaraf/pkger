@@ -64,6 +64,7 @@
     "babylon": "^6.18.0",
     "camelcase": "^5.2.0",
     "chalk": "^2.4.2",
+    "cosmiconfig": "^6.0.0",
     "enquirer": "^2.3.4",
     "eslint": "^6.1.0",
     "eslint-config-prettier": "^6.0.0",

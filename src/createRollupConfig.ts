@@ -1,5 +1,5 @@
 import { safeVariableName, safePackageName, external } from './utils';
-import { paths } from './constants';
+import { paths } from './utils';
 import { RollupOptions } from 'rollup';
 import { terser } from 'rollup-plugin-terser';
 import { DEFAULT_EXTENSIONS } from '@babel/core';
@@ -12,13 +12,13 @@ import sourceMaps from 'rollup-plugin-sourcemaps';
 import typescript from 'rollup-plugin-typescript2';
 import ts from 'typescript';
 
-import { extractErrors } from './errors/extractErrors';
+// import { extractErrors } from '../archive/errors/extractErrors';
 import { babelPluginTsdx } from './babelPluginTsdx';
 import { TsdxOptions } from './types';
 
-const errorCodeOpts = {
-  errorMapFilePath: paths.appErrorsJson,
-};
+// const errorCodeOpts = {
+//   errorMapFilePath: paths.appErrorsJson,
+// };
 
 // shebang cache map thing because the transform only gets run once
 let shebang: any = {};
@@ -27,10 +27,12 @@ export async function createRollupConfig(
   opts: TsdxOptions,
   outputNum: number
 ): Promise<RollupOptions> {
-  const findAndRecordErrorCodes = await extractErrors({
-    ...errorCodeOpts,
-    ...opts,
-  });
+  // const findAndRecordErrorCodes = await extractErrors({
+  //   ...errorCodeOpts,
+  //   ...opts,
+  // });
+
+  // console.log(opts, outputNum);
 
   const shouldMinify =
     opts.minify !== undefined ? opts.minify : opts.env === 'production';
@@ -103,12 +105,12 @@ export async function createRollupConfig(
       exports: 'named',
     },
     plugins: [
-      !!opts.extractErrors && {
-        async transform(source: any) {
-          await findAndRecordErrorCodes(source);
-          return source;
-        },
-      },
+      // !!opts.extractErrors && {
+      //   async transform(source: any) {
+      //     await findAndRecordErrorCodes(source);
+      //     return source;
+      //   },
+      // },
       resolve({
         mainFields: [
           'module',
@@ -181,7 +183,7 @@ export async function createRollupConfig(
       }),
       babelPluginTsdx({
         exclude: 'node_modules/**',
-        extensions: [...DEFAULT_EXTENSIONS, 'ts', 'tsx'],
+        extensions: [...DEFAULT_EXTENSIONS, '.ts', '.tsx'],
         passPerPreset: true,
         custom: {
           targets: opts.target === 'node' ? { node: '8' } : undefined,

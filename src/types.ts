@@ -12,7 +12,7 @@ export type ModuleFormat = 'cjs' | 'umd' | 'esm' | 'system';
 export interface BuildOpts extends SharedOpts {
   name?: string;
   entry?: string | string[];
-  format: 'cjs,esm';
+  format: string;
   target: 'browser';
 }
 

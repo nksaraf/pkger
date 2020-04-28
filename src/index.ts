@@ -1,75 +1,14 @@
 #!/usr/bin/env node
 
 import sade from 'sade';
-import glob from 'tiny-glob/sync';
-// import { watch, RollupWatchOptions, WatcherOptions } from 'rollup';
-// import chalk from 'chalk';
-import * as fs from 'fs-extra';
-// import jest from 'jest';
-// import { CLIEngine } from 'eslint';
-// import logError from './logError';
-import path from 'path';
-// import execa from 'execa';
-// import ora from 'ora';
-import { paths } from './utils';
-// import { createBuildConfigs } from './createBuildConfigs';
-// import { createJestConfig, JestConfigOptions } from '../archive/createJestConfig';
-// import { createEslintConfig } from '../archive/createEslintConfig';
-import {
-  resolveApp,
-  safePackageName,
-  // clearConsole,
-  isDir,
-  isFile,
-} from './utils';
-import { concatAllArray } from 'jpjs';
-import { PackageJson, WatchOpts, ModuleFormat, NormalizedOpts } from './types';
 import { templates } from './templates';
 import { create } from './create';
 import { build } from './build';
-const pkg = require('../package.json');
-
+const pkger = require('../package.json');
 const prog = sade('pkger');
 
-let appPackageJson: PackageJson;
-
-try {
-  appPackageJson = fs.readJSONSync(paths.appPackageJson);
-} catch (e) {}
-
-async function jsOrTs(filename: string) {
-  const extension = (await isFile(resolveApp(filename + '.ts')))
-    ? '.ts'
-    : (await isFile(resolveApp(filename + '.tsx')))
-    ? '.tsx'
-    : (await isFile(resolveApp(filename + '.jsx')))
-    ? '.jsx'
-    : '.js';
-
-  return resolveApp(`${filename}${extension}`);
-}
-
-async function getInputs(
-  entries?: string | string[],
-  source?: string
-): Promise<string[]> {
-  let inputs: string[] = [];
-  let stub: any[] = [];
-  stub
-    .concat(
-      entries && entries.length
-        ? entries
-        : (source && resolveApp(source)) ||
-            ((await isDir(resolveApp('src'))) && (await jsOrTs('src/index')))
-    )
-    .map(file => glob(file))
-    .forEach(input => inputs.push(input));
-
-  return concatAllArray(inputs);
-}
-
 prog
-  .version(pkg.version)
+  .version(pkger.version)
   .command('create <pkg>')
   .describe('Create a new package with TSDX')
   .example('create mypackage')
@@ -214,38 +153,6 @@ prog
     'build --extractErrors=https://reactjs.org/docs/error-decoder.html?invariant='
   )
   .action(build);
-
-export async function normalizeOpts(opts: WatchOpts): Promise<NormalizedOpts> {
-  return {
-    ...opts,
-    name: opts.name || appPackageJson.name,
-    input: await getInputs(opts.entry, appPackageJson.source),
-    format: opts.format.split(',').map((format: string) => {
-      if (format === 'es') {
-        return 'esm';
-      }
-      return format;
-    }) as [ModuleFormat, ...ModuleFormat[]],
-  };
-}
-
-export async function cleanDistFolder() {
-  await fs.remove(paths.appDist);
-}
-
-export function writeCjsEntryFile(name: string) {
-  const baseLine = `module.exports = require('./${safePackageName(name)}`;
-  const contents = `
-'use strict'
-
-if (process.env.NODE_ENV === 'production') {
-  ${baseLine}.cjs.production.min.js')
-} else {
-  ${baseLine}.cjs.development.js')
-}
-`;
-  return fs.outputFile(path.join(paths.appDist, 'index.js'), contents);
-}
 
 // prog
 //   .command('test')
