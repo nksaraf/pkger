@@ -7,6 +7,7 @@ const build_1 = require("./build");
 const watch_1 = require("./watch");
 // @ts-ignore
 const package_json_1 = require("../package.json");
+const utils_1 = require("./utils");
 const prog = sade_1.default('pkger').version(package_json_1.version);
 prog
     .command('create <pkg>')
@@ -15,6 +16,14 @@ prog
     .option('--template', `Specify a template. Allowed choices: [${create_1.templates.join(', ')}]`)
     .example('create --template react mypackage')
     .action(create_1.create);
+prog.command('check')
+    .option('--tsconfig', 'Specify custom tsconfig path')
+    .example('watch --tsconfig ./tsconfig.foo.json')
+    .action(async (cliOpts) => {
+    console.log('here');
+    console.log(cliOpts);
+    console.log(await utils_1.runCommand(`tsc -p ${cliOpts.tsconfig}`));
+});
 prog
     .command('watch')
     .describe('Rebuilds on any change')

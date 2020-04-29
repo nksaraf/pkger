@@ -10,6 +10,13 @@ const utils_1 = require("./utils");
 const chalk_1 = tslib_1.__importDefault(require("chalk"));
 async function watch(cliOpts) {
     const options = await config_1.createConfig(cliOpts);
+    // if (!options.noClean) {
+    // await cleanDistFolder();
+    // }
+    // if (opts.format.includes('cjs')) {
+    //   await writeCjsEntryFile(opts.name);
+    // }
+    const logger = await utils_1.createProgressEstimator();
     let firstTime = true;
     let successKiller = null;
     let failureKiller = null;
@@ -46,16 +53,22 @@ async function watch(cliOpts) {
         }
         if (event.code === 'END') {
             spinner.succeed(chalk_1.default.bold.green('Compiled successfully'));
-            console.log(`
-  ${chalk_1.default.dim('Watching for changes')}
-  `);
             // try {
             // await deprecated.moveTypes();
             // if (firstTime && opts.onFirstSuccess) {
             firstTime = false;
             // run(opts.onFirstSuccess);
             // } else {
-            // successKiller = run(opts.onSuccess);
+            var spin = ora_1.default().start(chalk_1.default.bold.blue('Typechecking...'));
+            try {
+                var successKiller = await utils_1.runCommand(`tsc -p ${options.tsconfig}`);
+                spin.succeed(chalk_1.default.green('Checked'));
+            }
+            catch (e) {
+                spin.fail(chalk_1.default.red('Failed typechecking'));
+                // console.log(e);
+            }
+            console.log(`${chalk_1.default.dim('Watching for changes')}`);
             // }
             // } catch (_error) {}
         }

@@ -22,7 +22,7 @@ export async function watch(cliOpts: any) {
   //   await writeCjsEntryFile(opts.name);
   // }
 
-  // const logger = createProgressEstimator();
+  const logger = await createProgressEstimator();
 
   type Killer = execa.ExecaChildProcess | null;
 
@@ -69,9 +69,6 @@ export async function watch(cliOpts: any) {
     }
     if (event.code === 'END') {
       spinner.succeed(chalk.bold.green('Compiled successfully'));
-      console.log(`
-  ${chalk.dim('Watching for changes')}
-  `);
 
       // try {
       // await deprecated.moveTypes();
@@ -80,7 +77,20 @@ export async function watch(cliOpts: any) {
       firstTime = false;
       // run(opts.onFirstSuccess);
       // } else {
-      // successKiller = run(opts.onSuccess);
+
+      var spin = ora().start(chalk.bold.blue('Typechecking...')); 
+      try {
+        var successKiller = await runCommand(`tsc -p ${options.tsconfig}`);
+        spin.succeed(chalk.green('Checked'));
+      } catch (e) {
+        spin.fail(chalk.red('Failed typechecking'))
+        // console.log(e);
+      }
+
+      console.log(
+      `${chalk.dim('Watching for changes')}`
+      );
+      
       // }
       // } catch (_error) {}
     }

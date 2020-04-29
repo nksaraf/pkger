@@ -6,6 +6,7 @@ import { watch } from './watch';
 import { version } from '../package.json';
 
 import chalk from 'chalk';
+import { runCommand } from './utils';
 
 const prog = sade('pkger').version(version);
 
@@ -19,6 +20,15 @@ prog
   )
   .example('create --template react mypackage')
   .action(create);
+
+prog.command('check')
+  .option('--tsconfig', 'Specify custom tsconfig path')
+  .example('watch --tsconfig ./tsconfig.foo.json')
+  .action(async (cliOpts) => {
+    console.log('here');
+    console.log(cliOpts);
+    console.log(await runCommand(`tsc -p ${cliOpts.tsconfig}`));
+  })
 
 prog
   .command('watch')
