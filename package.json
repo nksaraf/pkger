@@ -1,6 +1,6 @@
 {
   "name": "pkger",
-  "version": "0.0.2-next.1",
+  "version": "0.0.2-next.2",
   "author": "Nikhil Saraf <nsaraf98@gmail.com>",
   "description": "Zero-config TypeScript package development",
   "license": "MIT",
@@ -66,7 +66,7 @@
     "mustache": "^4.0.1",
     "ora": "^4.0.4",
     "pascal-case": "^3.1.1",
-    "pkger": "^0.0.1",
+    "pkger": "^0.0.2-next.1",
     "prettier": "^2.0.5",
     "progress-estimator": "^0.2.2",
     "resolve": "^1.17.0",
