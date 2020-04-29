@@ -1,6 +1,6 @@
 {
   "name": "pkger",
-  "version": "0.0.1-beta.2",
+  "version": "0.0.1",
   "author": "Nikhil Saraf <nsaraf98@gmail.com>",
   "description": "Zero-config TypeScript package development",
   "license": "MIT",
