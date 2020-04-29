@@ -1,6 +1,6 @@
 {
   "name": "pkger",
-  "version": "0.0.2-next.11",
+  "version": "0.0.2-next.12",
   "author": "Nikhil Saraf <nsaraf98@gmail.com>",
   "description": "Zero-config TypeScript package development",
   "license": "MIT",
@@ -66,6 +66,7 @@
     "fs-extra": "^9.0.0",
     "greenlet": "^1.1.0",
     "gzip-size": "^5.1.1",
+    "intercept-stdout": "^0.1.2",
     "lodash": "^4.17.15",
     "magic-string": "^0.25.7",
     "mustache": "^4.0.1",
