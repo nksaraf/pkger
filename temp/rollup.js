@@ -11,7 +11,7 @@ const plugin_node_resolve_1 = tslib_1.__importDefault(require("@rollup/plugin-no
 const resolve_1 = tslib_1.__importDefault(require("resolve"));
 // import sourceMaps from 'rollup-plugin-sourcemaps';
 // import typescript from 'rollup-plugin-typescript2';
-const rollup_plugin_babel_1 = tslib_1.__importDefault(require("rollup-plugin-babel"));
+const plugin_babel_1 = tslib_1.__importDefault(require("@rollup/plugin-babel"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const babel_1 = require("./babel");
 const magic_string_1 = tslib_1.__importDefault(require("magic-string"));
@@ -62,7 +62,7 @@ function createRollupConfig(opts, outputNum) {
                 return true;
             }
             try {
-                if (!opts.entryPaths) {
+                if (!opts.pkgSources) {
                     return false;
                 }
                 // what is the imported file path
@@ -71,7 +71,7 @@ function createRollupConfig(opts, outputNum) {
                     extensions: extensions,
                 });
                 // @ts-ignore is it one of the pkg entries
-                const entry = opts.entryPaths.find(o => p === o);
+                const entry = opts.pkgSources.find(o => p === o);
                 if (!entry) {
                     return false;
                 }
@@ -139,11 +139,12 @@ function createRollupConfig(opts, outputNum) {
                     include: /\/node_modules\//,
                 }),
             plugin_json_1.default(),
-            rollup_plugin_babel_1.default({
+            plugin_babel_1.default({
                 babelrc: false,
                 configFile: false,
                 compact: false,
                 exclude: 'node_modules/**',
+                babelHelpers: 'bundled',
                 extensions,
                 presets,
                 plugins,

@@ -7,7 +7,7 @@ import progressEstimator from 'progress-estimator';
 import { PackageJson } from './types';
 import execa from 'execa';
 
-export const DEBUG = true;
+export const DEBUG = false;
 
 // Remove the package name scope if it exists
 export const removeScope = (name: string) => name.replace(/^@.*\//, '');

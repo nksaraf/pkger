@@ -21,13 +21,13 @@ import pluginTransformRegen from '@babel/plugin-transform-regenerator';
 // import pluginStyledComponents from 'babel-plugin-styled-components';
 import pluginMacros from 'babel-plugin-macros';
 
-let hasReact = pkg =>
+let hasReact = (pkg: string) =>
   ['dependencies', 'devDependencies', 'peerDependencies'].reduce(
     (last, current) => last || (pkg[current] && pkg[current]['react']),
     false
   );
 
-export const babelConfig = options => {
+export const babelConfig = (options: any) => {
   const extensions = [...DEFAULT_EXTENSIONS, '.ts', '.tsx', '.json', '.node'];
   const { browserlist, format } = options;
 
@@ -46,7 +46,7 @@ export const babelConfig = options => {
         loose: true,
         useBuiltIns: false,
         modules: false,
-        targets: format === 'umd' ? browserlist + ', ie 11' : browserlist,
+        targets: options.target === 'node' ? { node: '12' } : { esmodules: true},
         exclude: ['transform-async-to-generator', 'transform-regenerator'],
       },
     ],
@@ -58,12 +58,12 @@ export const babelConfig = options => {
     [pluginObjectRestSpread, { loose: true, useBuiltIns: true }],
     [pluginAsyncToPromise, { inlineHelpers: true, externalHelpers: true }],
     // [pluginDecorators, { legacy: true }],
-    [pluginClassProperties, { loose: true }],
+    [pluginClassProperties, { loose: false }],
     [pluginTransformRegen, { async: false }],
     [pluginNullOperator],
     [pluginOptionalChaining],
     // pluginStyledComponents,
-    pluginMacros,
+    [pluginMacros],
   ];
 
   return { presets, plugins, extensions };

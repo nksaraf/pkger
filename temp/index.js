@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
@@ -8,29 +7,6 @@ const build_1 = require("./build");
 const watch_1 = require("./watch");
 // @ts-ignore
 const package_json_1 = require("../package.json");
-const chalk_1 = tslib_1.__importDefault(require("chalk"));
-exports.headerVert = chalk_1.default.red(`          __. 
-    __.--'   \\
-    \\         \\
-      \\    __.--\`--.__
-      _'--'    |   __'\\
-     /   \`-.__.---'    \\
-    /      /|\\          \\
-    -.    / | \\     __.--'
-      \`-./  |  \\_.-'   |
- ---- |     |          |-----
-      \`-._  |      __.-'
-          \`-|__.--'  
-${chalk_1.default.blue(`
-  ______  _                      
-  | ___ \| |                     
-  | |_/ /| | __ __ _   ___  _ __ 
-  |  __/ | |/ // _\` | / _ \\| '__|
-  | |    |   <| (_| ||  __/| |   
-  \\_|    |_|\\_\\\\__, | \\___||_|   
-                __/ |            
-                |___/  `)}           
-            `);
 const prog = sade_1.default('pkger').version(package_json_1.version);
 prog
     .command('create <pkg>')
@@ -44,11 +20,11 @@ prog
     .describe('Rebuilds on any change')
     .option('--entry, -i', 'Entry module(s)')
     .example('watch --entry src/foo.tsx')
-    .option('--target', 'Specify your target environment', 'browser')
+    .option('--target', 'Specify your target environment')
     .example('watch --target node')
     .option('--name', 'Specify name exposed in UMD builds')
     .example('watch --name Foo')
-    .option('--format', 'Specify module format(s)', 'cjs,esm')
+    .option('--format', 'Specify module format(s)')
     .example('watch --format cjs,esm')
     .option('--verbose', 'Keep outdated console output in watch mode instead of clearing the screen')
     .example('watch --verbose')

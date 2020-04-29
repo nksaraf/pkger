@@ -7,7 +7,7 @@ const chalk_1 = tslib_1.__importDefault(require("chalk"));
 const camelcase_1 = tslib_1.__importDefault(require("camelcase"));
 const progress_estimator_1 = tslib_1.__importDefault(require("progress-estimator"));
 const execa_1 = tslib_1.__importDefault(require("execa"));
-exports.DEBUG = true;
+exports.DEBUG = false;
 // Remove the package name scope if it exists
 exports.removeScope = (name) => name.replace(/^@.*\//, '');
 // UMD-safe package name
@@ -115,7 +115,7 @@ function getOutputPath(options) {
         [
             (_a = 
             // @ts-ignore
-            options.entryName, (_a !== null && _a !== void 0 ? _a : options.name)),
+            options.entryName) !== null && _a !== void 0 ? _a : options.name,
             'js',
         ]
             .filter(Boolean)

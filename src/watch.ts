@@ -16,7 +16,7 @@ import chalk from 'chalk';
 export async function watch(cliOpts: any) {
   const options = await createConfig(cliOpts);
   // if (!options.noClean) {
-  await cleanDistFolder();
+  // await cleanDistFolder();
   // }
   // if (opts.format.includes('cjs')) {
   //   await writeCjsEntryFile(opts.name);

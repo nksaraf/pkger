@@ -8,7 +8,7 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import resolve from 'resolve';
 // import sourceMaps from 'rollup-plugin-sourcemaps';
 // import typescript from 'rollup-plugin-typescript2';
-import babel from 'rollup-plugin-babel';
+import babel from '@rollup/plugin-babel';
 import path from 'path';
 // import ts from 'typescript';
 
@@ -98,7 +98,7 @@ export function createRollupConfig(
       }
 
       try {
-        if (!opts.entryPaths) {
+        if (!opts.pkgSources) {
           return false;
         }
         // what is the imported file path
@@ -107,7 +107,7 @@ export function createRollupConfig(
           extensions: extensions,
         });
         // @ts-ignore is it one of the pkg entries
-        const entry = opts.entryPaths.find(o => p === o);
+        const entry = opts.pkgSources.find(o => p === o);
         if (!entry) {
           return false;
         }
@@ -181,6 +181,7 @@ export function createRollupConfig(
         configFile: false,
         compact: false,
         exclude: 'node_modules/**',
+        babelHelpers: 'bundled',
         extensions,
         presets,
         plugins,

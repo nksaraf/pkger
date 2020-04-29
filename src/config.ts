@@ -21,6 +21,9 @@ export async function createConfig(cliOpts: any) {
     undefined,
     cwd
   );
+  const tsconfigContents = await fs.readJSON(
+    path.join(cwd, tsconfig ?? 'tsconfig.build.json')
+  );
   let source = resolveEntry(cwd);
   source = source ? './' + getRelativePath(cwd, source) : undefined;
   DEBUG && console.log('SOURCE', source);
@@ -35,6 +38,7 @@ export async function createConfig(cliOpts: any) {
         target: 'browser',
         // format: 'esm,cjs',
         tsconfig,
+        tsconfigContents,
         rollup(config: RollupOptions, _options: TsdxOptions): RollupOptions {
           return config;
         },

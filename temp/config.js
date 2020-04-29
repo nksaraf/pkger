@@ -11,10 +11,11 @@ const explorer = cosmiconfig_1.cosmiconfig('pkger');
 async function createConfig(cliOpts) {
     var _a, _b;
     const cwd = process.cwd();
-    const config = (_b = (_a = (await explorer.search(cwd))) === null || _a === void 0 ? void 0 : _a.config, (_b !== null && _b !== void 0 ? _b : {}));
+    const config = (_b = (_a = (await explorer.search(cwd))) === null || _a === void 0 ? void 0 : _a.config) !== null && _b !== void 0 ? _b : {};
     const packageJson = await loadPackageJson();
     const name = path_1.default.basename(cwd);
     const tsconfig = firstExistingPath(['tsconfig.build.json', 'tsconfig.json'], undefined, cwd);
+    const tsconfigContents = await fs.readJSON(path_1.default.join(cwd, tsconfig !== null && tsconfig !== void 0 ? tsconfig : 'tsconfig.build.json'));
     let source = resolveEntry(cwd);
     source = source ? './' + getRelativePath(cwd, source) : undefined;
     utils_1.DEBUG && console.log('SOURCE', source);
@@ -25,6 +26,7 @@ async function createConfig(cliOpts) {
         target: 'browser',
         // format: 'esm,cjs',
         tsconfig,
+        tsconfigContents,
         rollup(config, _options) {
             return config;
         },

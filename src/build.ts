@@ -5,6 +5,7 @@ import {
   createProgressEstimator,
   getOutputPath,
   cleanDistFolder,
+  runCommand,
 } from './utils';
 import { BuildOpts } from './types';
 import * as fs from 'fs-extra';
@@ -66,6 +67,31 @@ async function createPkgTasks(pkg: any) {
       pkg.target !== 'cli' && {
         run: async () => {
           fs.mkdirp(path.join(process.cwd(), pkg.entryName));
+          const packageJson = {
+            name: pkg.name,
+            private: true,
+            ...(pkg.format.includes('cjs')
+              ? {
+                  main: getRelativePath(
+                    path.join(process.cwd(), pkg.entryName),
+                    getOutputPath({ ...pkg, format: 'cjs' })
+                  ),
+                }
+              : {}),
+            ...(pkg.format.includes('esm')
+              ? {
+                  module: getRelativePath(
+                    path.join(process.cwd(), pkg.entryName),
+                    getOutputPath({ ...pkg, format: 'esm' })
+                  ),
+                }
+              : {}),
+            types:  '../' + (pkg.tsconfigContents['declarationDir'] || '../dist/types')
+          };
+          await fs.writeFile(
+            path.join(process.cwd(), pkg.entryName, 'package.json'),
+            JSON.stringify(packageJson, null, 2)
+          );
         },
       },
     // format.includes('cjs') &&
@@ -97,6 +123,19 @@ function addBin(pkg: { cmd: any; name: string }) {
   };
 }
 
+function ensureInFiles(entryName: string) {
+  return (pkgJson: { [x: string]: any }) => {
+    const { files = [], ...other } = pkgJson;
+    if (!files.some((f: any) => f === entryName)) {
+      files.push(entryName);
+    }
+    return {
+      ...other,
+      files,
+    };
+  };
+}
+
 async function createAllTasks(options: any) {
   const { entries, ...root } = options;
   return flatten(
@@ -116,20 +155,46 @@ async function createAllTasks(options: any) {
                 getOutputPath({ ...root, format: 'esm' })
               ),
             })),
+          root.target === 'browser' &&
+            ((p: any) => ({
+              ...p,
+              browser: getRelativePath(
+                process.cwd(),
+                getOutputPath({ ...root, format: 'esm' })
+              ),
+            })),
           root.format.includes('cjs') &&
             ((p: any) => ({
               ...p,
               main: getRelativePath(
                 process.cwd(),
-                getOutputPath({ ...root, format: 'cjs', env: 'production' })
+                getOutputPath({ ...root, format: 'cjs' })
               ),
             })),
+          (p: any) => ({
+            ...p,
+            types: options.tsconfigContents['declarationDir'] || 'dist/types',
+          }),
           // add bin for 'cli'
           ...[entries, root]
             .filter(entry => entry.target === 'cli')
             .map(pkg => addBin(pkg)),
+          ...entries
+            .filter((entry: { target: string }) => entry.target !== 'cli')
+            .map((pkg: { cmd: any; entryName: string }) =>
+              ensureInFiles(pkg.entryName)
+            ),
+          ensureInFiles('dist'),
+          ensureInFiles(
+            options.tsconfigContents['declarationDir'] || 'dist/types'
+          ),
         ].filter(Boolean)
       ),
+      {
+        run: () => {
+          runCommand(`tsc -p ${options.tsconfig}`);
+        },
+      },
     ])
   );
 }

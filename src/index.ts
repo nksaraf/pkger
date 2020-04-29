@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import sade from 'sade';
 import { create, templates } from './create';
 import { build } from './build';
@@ -8,29 +6,6 @@ import { watch } from './watch';
 import { version } from '../package.json';
 
 import chalk from 'chalk';
-
-export const headerVert = chalk.red(`          __. 
-    __.--'   \\
-    \\         \\
-      \\    __.--\`--.__
-      _'--'    |   __'\\
-     /   \`-.__.---'    \\
-    /      /|\\          \\
-    -.    / | \\     __.--'
-      \`-./  |  \\_.-'   |
- ---- |     |          |-----
-      \`-._  |      __.-'
-          \`-|__.--'  
-${chalk.blue(`
-  ______  _                      
-  | ___ \| |                     
-  | |_/ /| | __ __ _   ___  _ __ 
-  |  __/ | |/ // _\` | / _ \\| '__|
-  | |    |   <| (_| ||  __/| |   
-  \\_|    |_|\\_\\\\__, | \\___||_|   
-                __/ |            
-                |___/  `)}           
-            `);
 
 const prog = sade('pkger').version(version);
 
@@ -50,11 +25,11 @@ prog
   .describe('Rebuilds on any change')
   .option('--entry, -i', 'Entry module(s)')
   .example('watch --entry src/foo.tsx')
-  .option('--target', 'Specify your target environment', 'browser')
+  .option('--target', 'Specify your target environment')
   .example('watch --target node')
   .option('--name', 'Specify name exposed in UMD builds')
   .example('watch --name Foo')
-  .option('--format', 'Specify module format(s)', 'cjs,esm')
+  .option('--format', 'Specify module format(s)')
   .example('watch --format cjs,esm')
   .option(
     '--verbose',

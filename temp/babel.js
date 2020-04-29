@@ -20,8 +20,8 @@ const plugin_proposal_optional_chaining_1 = tslib_1.__importDefault(require("@ba
 const plugin_transform_regenerator_1 = tslib_1.__importDefault(require("@babel/plugin-transform-regenerator"));
 // import pluginStyledComponents from 'babel-plugin-styled-components';
 const babel_plugin_macros_1 = tslib_1.__importDefault(require("babel-plugin-macros"));
-let hasReact = pkg => ['dependencies', 'devDependencies', 'peerDependencies'].reduce((last, current) => last || (pkg[current] && pkg[current]['react']), false);
-exports.babelConfig = options => {
+let hasReact = (pkg) => ['dependencies', 'devDependencies', 'peerDependencies'].reduce((last, current) => last || (pkg[current] && pkg[current]['react']), false);
+exports.babelConfig = (options) => {
     const extensions = [...core_1.DEFAULT_EXTENSIONS, '.ts', '.tsx', '.json', '.node'];
     const { browserlist, format } = options;
     // Note: when using `React`, presetTs needs `React` as jsxPragma,
@@ -38,7 +38,7 @@ exports.babelConfig = options => {
                 loose: true,
                 useBuiltIns: false,
                 modules: false,
-                targets: format === 'umd' ? browserlist + ', ie 11' : browserlist,
+                targets: options.target === 'node' ? { node: '12' } : { esmodules: true },
                 exclude: ['transform-async-to-generator', 'transform-regenerator'],
             },
         ],
@@ -49,12 +49,12 @@ exports.babelConfig = options => {
         [plugin_proposal_object_rest_spread_1.default, { loose: true, useBuiltIns: true }],
         [babel_plugin_transform_async_to_promises_1.default, { inlineHelpers: true, externalHelpers: true }],
         // [pluginDecorators, { legacy: true }],
-        [plugin_proposal_class_properties_1.default, { loose: true }],
+        [plugin_proposal_class_properties_1.default, { loose: false }],
         [plugin_transform_regenerator_1.default, { async: false }],
         [plugin_proposal_nullish_coalescing_operator_1.default],
         [plugin_proposal_optional_chaining_1.default],
         // pluginStyledComponents,
-        babel_plugin_macros_1.default,
+        [babel_plugin_macros_1.default],
     ];
     return { presets, plugins, extensions };
 };

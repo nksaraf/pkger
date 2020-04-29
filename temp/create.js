@@ -13,7 +13,28 @@ const semver_1 = tslib_1.__importDefault(require("semver"));
 const enquirer_1 = require("enquirer");
 const Output = tslib_1.__importStar(require("./output"));
 const utils_1 = require("./utils");
-const index_1 = require("./index");
+exports.headerVert = chalk_1.default.red(`          __. 
+    __.--'   \\
+    \\         \\
+      \\    __.--\`--.__
+      _'--'    |   __'\\
+     /   \`-.__.---'    \\
+    /      /|\\          \\
+    -.    / | \\     __.--'
+      \`-./  |  \\_.-'   |
+ ---- |     |          |-----
+      \`-._  |      __.-'
+          \`-|__.--'  
+${chalk_1.default.blue(`
+  ______  _                      
+  | ___ \| |                     
+  | |_/ /| | __ __ _   ___  _ __ 
+  |  __/ | |/ // _\` | / _ \\| '__|
+  | |    |   <| (_| ||  __/| |   
+  \\_|    |_|\\_\\\\__, | \\___||_|   
+                __/ |            
+                |___/  `)}           
+            `);
 function getNodeEngineRequirement({ engines }) {
     return engines && engines.node;
 }
@@ -44,7 +65,7 @@ const startMessage = async function (projectName) {
     const commands = {
         install: pkgManager === 'npm' ? 'npm install' : 'yarn install',
         build: pkgManager === 'npm' ? 'npm run build' : 'yarn build',
-        start: pkgManager === 'npm' ? 'npm run start' : 'yarn start',
+        start: pkgManager === 'npm' ? 'npm run dev' : 'yarn dev',
         test: pkgManager === 'npm' ? 'npm test' : 'yarn test',
     };
     return `
@@ -78,7 +99,7 @@ const incorrectNodeVersionMessage = function (requiredVersion) {
     return `Unsupported Node version! Your current Node version (${chalk_1.default.red(process.version)}) does not satisfy the requirement of Node ${chalk_1.default.cyan(requiredVersion)}.`;
 };
 async function create(pkg, opts) {
-    console.log(chalk_1.default.red(index_1.headerVert));
+    console.log(chalk_1.default.red(exports.headerVert));
     const bootSpinner = ora_1.default(`Creating ${chalk_1.default.bold.green(pkg)}...`);
     try {
         const cwd = await fs_extra_1.default.realpath(process.cwd());

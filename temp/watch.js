@@ -10,8 +10,6 @@ const utils_1 = require("./utils");
 const chalk_1 = tslib_1.__importDefault(require("chalk"));
 async function watch(cliOpts) {
     const options = await config_1.createConfig(cliOpts);
-    // if (!options.noClean) {
-    await utils_1.cleanDistFolder();
     let firstTime = true;
     let successKiller = null;
     let failureKiller = null;

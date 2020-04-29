@@ -3,9 +3,9 @@
   "author": "{{author}}",
   "version": "0.1.0",
   "license": "MIT",
-  "main": "dist/{{pkgname}}.js",
-  "module": "dist/{{pkgname}}.esm.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/cjs/{{pkgname}}.js",
+  "module": "dist/esm/{{pkgname}}.js",
+  "types": "dist/types",
   "files": [
     "dist"
   ],
@@ -13,14 +13,9 @@
     "node": ">=10"
   },
   "scripts": {
-    "start": "tsdx watch",
-    "build": "tsdx build",
-    "prepare": "yarn build"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "tsdx lint"
-    }
+    "dev": "pkger watch",
+    "build": "pkger build",
+    "prepare": "pkger"
   },
   "dependencies": {},
   "devDependencies": {

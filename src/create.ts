@@ -11,7 +11,28 @@ import { Input, Select } from 'enquirer';
 import * as Output from './output';
 import { isDir, logError } from './utils';
 import { PackageJson } from './types';
-import { headerVert } from './index';
+export const headerVert = chalk.red(`          __. 
+    __.--'   \\
+    \\         \\
+      \\    __.--\`--.__
+      _'--'    |   __'\\
+     /   \`-.__.---'    \\
+    /      /|\\          \\
+    -.    / | \\     __.--'
+      \`-./  |  \\_.-'   |
+ ---- |     |          |-----
+      \`-._  |      __.-'
+          \`-|__.--'  
+${chalk.blue(`
+  ______  _                      
+  | ___ \| |                     
+  | |_/ /| | __ __ _   ___  _ __ 
+  |  __/ | |/ // _\` | / _ \\| '__|
+  | |    |   <| (_| ||  __/| |   
+  \\_|    |_|\\_\\\\__, | \\___||_|   
+                __/ |            
+                |___/  `)}           
+            `);
 
 export let pkgManager: PackageManager;
 
@@ -59,7 +80,7 @@ const startMessage = async function(projectName: string) {
   const commands = {
     install: pkgManager === 'npm' ? 'npm install' : 'yarn install',
     build: pkgManager === 'npm' ? 'npm run build' : 'yarn build',
-    start: pkgManager === 'npm' ? 'npm run start' : 'yarn start',
+    start: pkgManager === 'npm' ? 'npm run dev' : 'yarn dev',
     test: pkgManager === 'npm' ? 'npm test' : 'yarn test',
   };
 
