@@ -1,6 +1,6 @@
 {
   "name": "pkger",
-  "version": "0.0.2-next.9",
+  "version": "0.0.2-next.10",
   "author": "Nikhil Saraf <nsaraf98@gmail.com>",
   "description": "Zero-config TypeScript package development",
   "license": "MIT",
@@ -64,6 +64,8 @@
     "enquirer": "^2.3.5",
     "execa": "4.0.0",
     "fs-extra": "^9.0.0",
+    "greenlet": "^1.1.0",
+    "gzip-size": "^5.1.1",
     "lodash": "^4.17.15",
     "magic-string": "^0.25.7",
     "mustache": "^4.0.1",
@@ -71,6 +73,7 @@
     "pascal-case": "^3.1.1",
     "pkger": "^0.0.2-next.5",
     "prettier": "^2.0.5",
+    "pretty-bytes": "^5.3.0",
     "progress-estimator": "^0.2.2",
     "resolve": "^1.17.0",
     "rollup": "^2.7.3",
@@ -79,7 +82,10 @@
     "sade": "^1.7.3",
     "semver": "^7.3.2",
     "shelljs": "^0.8.4",
-    "tiny-glob": "^0.2.6"
+    "spinnies": "^0.5.1",
+    "tiny-glob": "^0.2.6",
+    "web-worker": "^1.0.0",
+    "workerize": "^0.1.8"
   },
   "devDependencies": {
     "@types/eslint": "^6.8.0",
