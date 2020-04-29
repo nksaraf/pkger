@@ -1,6 +1,6 @@
 {
   "name": "pkger",
-  "version": "0.0.1",
+  "version": "0.0.1-beta.1",
   "author": "Nikhil Saraf <nsaraf98@gmail.com>",
   "description": "Zero-config TypeScript package development",
   "license": "MIT",
@@ -31,10 +31,6 @@
     "start": "tsc -p tsconfig.json --watch",
     "release": "np"
   },
-  "files": [
-    "dist",
-    "templates"
-  ],
   "dependencies": {
     "@babel/core": "^7.4.4",
     "@babel/helper-module-imports": "^7.0.0",
@@ -141,5 +137,11 @@
     "semi": true,
     "singleQuote": true,
     "trailingComma": "es5"
-  }
+  },
+  "types": "dist/types",
+  "files": [
+    "dist",
+    "templates",
+    "dist/types"
+  ]
 }
