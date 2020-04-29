@@ -1,10 +1,13 @@
-import fs from 'fs-extra';
+import * as fs from 'fs-extra';
 import path from 'path';
+import chalk from 'chalk';
 import camelCase from 'camelcase';
+import progressEstimator from 'progress-estimator';
 
 import { PackageJson } from './types';
+import execa from 'execa';
 
-import chalk from 'chalk';
+export const DEBUG = true;
 
 // Remove the package name scope if it exists
 export const removeScope = (name: string) => name.replace(/^@.*\//, '');
@@ -22,29 +25,31 @@ export const safePackageName = (name: string) =>
     .toLowerCase()
     .replace(/(^@.*\/)|((^[^a-zA-Z]+)|[^\w.-])|([^a-zA-Z0-9]+$)/g, '');
 
-export const external = (id: string) =>
-  !id.startsWith('.') && !path.isAbsolute(id);
+// export const external = (id: string) =>
+//   !id.startsWith('.') && !path.isAbsolute(id);
 
 // Make sure any symlinks in the project folder are resolved:
 // https://github.com/facebookincubator/create-react-app/issues/637
-export const appDirectory = fs.realpathSync(process.cwd());
+export const pkgDirectory = fs.realpathSync(process.cwd());
 
-export const resolveApp = function(relativePath: string) {
-  return path.resolve(appDirectory, relativePath);
+export const resolvePkgPath = function(relativePath: string) {
+  return path.resolve(pkgDirectory, relativePath);
 };
 
 export const paths = {
-  appPackageJson: resolveApp('package.json'),
-  tsconfigJson: resolveApp('tsconfig.build.json'),
+  packageJson: resolvePkgPath('package.json'),
+  tsconfigJson: resolvePkgPath('tsconfig.build.json'),
   // testsSetup: resolveApp('test/setupTests.ts'),
-  appRoot: resolveApp('.'),
-  appSrc: resolveApp('lib'),
+  appRoot: resolvePkgPath('.'),
+  appSrc: resolvePkgPath('lib'),
   // appErrorsJson: resolveApp('errors/codes.json'),
   // appErrors: resolveApp('errors'),
-  appDist: resolveApp('dist'),
-  appConfig: resolveApp('tsdx.config.js'),
+  appDist: resolvePkgPath('dist'),
+  appConfig: resolvePkgPath('tsdx.config.js'),
   // jestConfig: resolveApp('jest.config.js'),
-  progressEstimatorCache: resolveApp('node_modules/.cache/.progress-estimator'),
+  progressEstimatorCache: resolvePkgPath(
+    'node_modules/.cache/.progress-estimator'
+  ),
 };
 
 // Taken from Create React App, react-dev-utils/clearConsole
@@ -105,4 +110,45 @@ export function logError(err: any) {
   }
 
   stderr();
+}
+
+export async function createProgressEstimator() {
+  await fs.ensureDir(paths.progressEstimatorCache);
+  // @ts-ignore
+  return progressEstimator({
+    // All configuration keys are optional, but it's recommended to specify a storage location.
+    storagePath: paths.progressEstimatorCache,
+  });
+}
+
+export function runCommand(command?: string) {
+  if (!command) {
+    return null;
+  }
+
+  const [exec, ...args] = command.split(' ');
+  return execa(exec, args, {
+    stdio: 'inherit',
+  });
+}
+
+export async function cleanDistFolder() {
+  await fs.remove(paths.appDist);
+}
+
+export function getOutputPath(options: any) {
+  return path.join(
+    ...[
+      paths.appDist,
+      options.format,
+      options.env,
+      [
+        // @ts-ignore
+        options.entryName ?? options.name,
+        'js',
+      ]
+        .filter(Boolean)
+        .join('.'),
+    ].filter(Boolean)
+  );
 }

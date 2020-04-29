@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-
-import sade from 'sade';
-import { create, templates } from './create';
-import { build } from './build';
-import { watch } from './watch';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+const sade_1 = tslib_1.__importDefault(require("sade"));
+const create_1 = require("./create");
+const build_1 = require("./build");
+const watch_1 = require("./watch");
 // @ts-ignore
-import { version } from '../package.json';
-
-import chalk from 'chalk';
-
-export const headerVert = chalk.red(`          __. 
+const package_json_1 = require("../package.json");
+const chalk_1 = tslib_1.__importDefault(require("chalk"));
+exports.headerVert = chalk_1.default.red(`          __. 
     __.--'   \\
     \\         \\
       \\    __.--\`--.__
@@ -21,7 +21,7 @@ export const headerVert = chalk.red(`          __.
  ---- |     |          |-----
       \`-._  |      __.-'
           \`-|__.--'  
-${chalk.blue(`
+${chalk_1.default.blue(`
   ______  _                      
   | ___ \| |                     
   | |_/ /| | __ __ _   ___  _ __ 
@@ -31,76 +31,65 @@ ${chalk.blue(`
                 __/ |            
                 |___/  `)}           
             `);
-
-const prog = sade('pkger').version(version);
-
+const prog = sade_1.default('pkger').version(package_json_1.version);
 prog
-  .command('create <pkg>')
-  .describe('Create a new package with TSDX')
-  .example('create mypackage')
-  .option(
-    '--template',
-    `Specify a template. Allowed choices: [${templates.join(', ')}]`
-  )
-  .example('create --template react mypackage')
-  .action(create);
-
+    .command('create <pkg>')
+    .describe('Create a new package with TSDX')
+    .example('create mypackage')
+    .option('--template', `Specify a template. Allowed choices: [${create_1.templates.join(', ')}]`)
+    .example('create --template react mypackage')
+    .action(create_1.create);
 prog
-  .command('watch')
-  .describe('Rebuilds on any change')
-  .option('--entry, -i', 'Entry module(s)')
-  .example('watch --entry src/foo.tsx')
-  .option('--target', 'Specify your target environment', 'browser')
-  .example('watch --target node')
-  .option('--name', 'Specify name exposed in UMD builds')
-  .example('watch --name Foo')
-  .option('--format', 'Specify module format(s)', 'cjs,esm')
-  .example('watch --format cjs,esm')
-  .option(
-    '--verbose',
-    'Keep outdated console output in watch mode instead of clearing the screen'
-  )
-  .example('watch --verbose')
-  .option('--noClean', "Don't clean the dist folder", '')
-  .example('watch --noClean')
-  .option('--tsconfig', 'Specify custom tsconfig path')
-  .example('watch --tsconfig ./tsconfig.foo.json')
-  .option('--onFirstSuccess', 'Run a command on the first successful build')
-  .example('watch --onFirstSuccess "echo The first successful build!"')
-  .option('--onSuccess', 'Run a command on a successful build')
-  .example('watch --onSuccess "echo Successful build!"')
-  .option('--onFailure', 'Run a command on a failed build')
-  .example('watch --onFailure "The build failed!"')
-  .option('--transpileOnly', 'Skip type checking')
-  .example('watch --transpileOnly')
-  .option('--extractErrors', 'Extract invariant errors to ./errors/codes.json.')
-  .example('watch --extractErrors')
-  .action(watch);
-
+    .command('watch')
+    .describe('Rebuilds on any change')
+    .option('--entry, -i', 'Entry module(s)')
+    .example('watch --entry src/foo.tsx')
+    .option('--target', 'Specify your target environment', 'browser')
+    .example('watch --target node')
+    .option('--name', 'Specify name exposed in UMD builds')
+    .example('watch --name Foo')
+    .option('--format', 'Specify module format(s)', 'cjs,esm')
+    .example('watch --format cjs,esm')
+    .option('--verbose', 'Keep outdated console output in watch mode instead of clearing the screen')
+    .example('watch --verbose')
+    .option('--noClean', "Don't clean the dist folder", '')
+    .example('watch --noClean')
+    .option('--tsconfig', 'Specify custom tsconfig path')
+    .example('watch --tsconfig ./tsconfig.foo.json')
+    .option('--onFirstSuccess', 'Run a command on the first successful build')
+    .example('watch --onFirstSuccess "echo The first successful build!"')
+    .option('--onSuccess', 'Run a command on a successful build')
+    .example('watch --onSuccess "echo Successful build!"')
+    .option('--onFailure', 'Run a command on a failed build')
+    .example('watch --onFailure "The build failed!"')
+    .option('--transpileOnly', 'Skip type checking')
+    .example('watch --transpileOnly')
+    .option('--extractErrors', 'Extract invariant errors to ./errors/codes.json.')
+    .example('watch --extractErrors')
+    .action(watch_1.watch);
 prog
-  .command('build', '', { default: true })
-  .describe('Build your project once and exit')
-  .option('--source, --entry, -i,', 'Entry module(s)')
-  .example('build --source src/foo.tsx')
-  .option('--target', 'Specify your target environment')
-  .example('build --target node')
-  .option('--name', 'Specify name exposed in UMD builds')
-  .example('build --name Foo')
-  .option('--format', 'Specify module format(s)')
-  .example('build --format cjs,esm')
-  .option('--tsconfig', 'Specify custom tsconfig path')
-  .example('build --tsconfig ./tsconfig.foo.json')
-  .option('--transpileOnly', 'Skip type checking')
-  .example('build --transpileOnly')
-  // .option(
-  //   '--extractErrors',
-  //   'Extract errors to ./errors/codes.json and provide a url for decoding.'
-  // )
-  // .example(
-  //   'build --extractErrors=https://reactjs.org/docs/error-decoder.html?invariant='
-  // )
-  .action(build);
-
+    .command('build', '', { default: true })
+    .describe('Build your project once and exit')
+    .option('--source, --entry, -i,', 'Entry module(s)')
+    .example('build --source src/foo.tsx')
+    .option('--target', 'Specify your target environment')
+    .example('build --target node')
+    .option('--name', 'Specify name exposed in UMD builds')
+    .example('build --name Foo')
+    .option('--format', 'Specify module format(s)')
+    .example('build --format cjs,esm')
+    .option('--tsconfig', 'Specify custom tsconfig path')
+    .example('build --tsconfig ./tsconfig.foo.json')
+    .option('--transpileOnly', 'Skip type checking')
+    .example('build --transpileOnly')
+    // .option(
+    //   '--extractErrors',
+    //   'Extract errors to ./errors/codes.json and provide a url for decoding.'
+    // )
+    // .example(
+    //   'build --extractErrors=https://reactjs.org/docs/error-decoder.html?invariant='
+    // )
+    .action(build_1.build);
 // prog
 //   .command('test')
 //   .describe(
@@ -116,7 +105,6 @@ prog
 //     process.on('unhandledRejection', err => {
 //       throw err;
 //     });
-
 //     const argv = process.argv.slice(2);
 //     let jestConfig: JestConfigOptions = {
 //       ...createJestConfig(
@@ -125,7 +113,6 @@ prog
 //       ),
 //       ...appPackageJson.jest,
 //     };
-
 //     // Allow overriding with jest.config
 //     const defaultPathExists = await fs.pathExists(paths.jestConfig);
 //     if (opts.config || defaultPathExists) {
@@ -133,7 +120,6 @@ prog
 //       const jestConfigContents: JestConfigOptions = require(jestConfigPath);
 //       jestConfig = { ...jestConfig, ...jestConfigContents };
 //     }
-
 //     // if custom path, delete the arg as it's already been merged
 //     if (opts.config) {
 //       let configIndex = argv.indexOf('--config');
@@ -149,18 +135,15 @@ prog
 //         }
 //       }
 //     }
-
 //     argv.push(
 //       '--config',
 //       JSON.stringify({
 //         ...jestConfig,
 //       })
 //     );
-
 //     const [, ...argsToPassToJestCli] = argv;
 //     jest.run(argsToPassToJestCli);
 //   });
-
 // prog
 //   .command('lint')
 //   .describe('Run eslint with Prettier')
@@ -191,13 +174,11 @@ prog
 //           )
 //         );
 //       }
-
 //       const config = await createEslintConfig({
 //         pkg: appPackageJson,
 //         rootDir: paths.appRoot,
 //         writeFile: opts['write-file'],
 //       });
-
 //       const cli = new CLIEngine({
 //         baseConfig: {
 //           ...config,
@@ -223,9 +204,7 @@ prog
 //       }
 //     }
 //   );
-
 prog.parse(process.argv);
-
 // export const header = chalk.red(`       __.
 //  __.--'   \\
 //  \\         \\

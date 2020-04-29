@@ -8,11 +8,10 @@ import glob from 'tiny-glob/sync';
 import Mustache from 'mustache';
 import semver from 'semver';
 import { Input, Select } from 'enquirer';
-import { templates } from './templates';
 import * as Output from './output';
 import { isDir, logError } from './utils';
 import { PackageJson } from './types';
-import { headerVert } from './header';
+import { headerVert } from './index';
 
 export let pkgManager: PackageManager;
 
@@ -21,6 +20,8 @@ type PackageManager = 'yarn' | 'npm';
 function getNodeEngineRequirement({ engines }: PackageJson) {
   return engines && engines.node;
 }
+
+export const templates = ['basic', 'react'];
 
 async function packageManager(): Promise<PackageManager> {
   if (pkgManager) {
@@ -155,7 +156,7 @@ const getTemplate = async (opts: any, spinner: ora.Ora) => {
     let template;
     const prompt = new Select({
       message: 'Choose a template',
-      choices: Object.keys(templates),
+      choices: templates,
     });
     if (opts.template) {
       template = opts.template.trim();

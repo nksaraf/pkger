@@ -1,6 +1,6 @@
 interface SharedOpts {
   // JS target
-  target: 'node' | 'browser';
+  target: 'node' | 'browser' | 'cli';
   // Path to tsconfig file
   tsconfig?: string;
   // Is error extraction running?
@@ -33,6 +33,7 @@ export interface NormalizedOpts
 }
 
 export interface TsdxOptions extends SharedOpts {
+  [x: string]: any;
   // Name of package
   name: string;
   // path to file

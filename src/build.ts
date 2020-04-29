@@ -1,197 +1,149 @@
-import { rollup, RollupOptions, OutputOptions, ModuleFormat } from 'rollup';
 import asyncro from 'asyncro';
-import { logError, isFile, resolveApp, isDir, safePackageName } from './utils';
-import { BuildOpts, PackageJson, WatchOpts } from './types';
-import { createProgressEstimator } from './createProgressEstimator';
-import { cosmiconfig } from 'cosmiconfig';
-import merge from 'lodash.merge';
+import {
+  logError,
+  safePackageName,
+  createProgressEstimator,
+  getOutputPath,
+  cleanDistFolder,
+} from './utils';
+import { BuildOpts } from './types';
 import * as fs from 'fs-extra';
-import { concatAllArray } from 'jpjs';
-import glob from 'tiny-glob/sync';
-import path from 'path';
 import { paths } from './utils';
-import { TsdxOptions, NormalizedOpts } from './types';
+import flatten from 'lodash/flatten';
+import path from 'path';
+import { createRollupTask, getRollupConfigs } from './rollup';
+import { createConfig, getRelativePath } from './config';
 
-import { createRollupConfig } from './createRollupConfig';
-
-let appPackageJson: PackageJson;
-
-try {
-  appPackageJson = fs.readJSONSync(paths.appPackageJson);
-} catch (e) {}
-
-async function jsOrTs(filename: string) {
-  const extension = (await isFile(resolveApp(filename + '.ts')))
-    ? '.ts'
-    : (await isFile(resolveApp(filename + '.tsx')))
-    ? '.tsx'
-    : (await isFile(resolveApp(filename + '.jsx')))
-    ? '.jsx'
-    : '.js';
-
-  return resolveApp(`${filename}${extension}`);
-}
-
-async function getInputs(
-  entries?: string | string[],
-  source?: string
-): Promise<string[]> {
-  let inputs: string[] = [];
-  let stub: any[] = [];
-  stub
-    .concat(
-      entries && entries.length
-        ? entries
-        : (source && resolveApp(source)) ||
-            ((await isDir(resolveApp('lib'))) && (await jsOrTs('lib/index')))
-    )
-    .map(file => glob(file))
-    .forEach(input => inputs.push(input));
-
-  return concatAllArray(inputs);
-}
-
-export async function normalizeOpts(opts: WatchOpts): Promise<NormalizedOpts> {
-  return {
-    ...opts,
-    name: opts.name || appPackageJson.name,
-    input: await getInputs(opts.entry, appPackageJson.source),
-    format: (opts.format.split(',').map((format: string) => {
-      if (format === 'es') {
-        return 'esm';
-      }
-      return format;
-    }) as [ModuleFormat, ...ModuleFormat[]]) as any,
-  };
-}
-
-export async function cleanDistFolder() {
-  await fs.remove(paths.appDist);
-}
-
-export function writeCjsEntryFile(name: string) {
-  const baseLine = `module.exports = require('./${safePackageName(name)}`;
-  const contents = `
+export function cjsEntryFile(name: string) {
+  const baseLine = `module.exports = require('./`;
+  return `
 'use strict'
 
 if (process.env.NODE_ENV === 'production') {
-  ${baseLine}.cjs.production.min.js')
+  ${baseLine}production/${name}.js')
 } else {
-  ${baseLine}.cjs.development.js')
+  ${baseLine}development/${name}.js')
 }
 `;
-  return fs.outputFile(path.join(paths.appDist, 'index.js'), contents);
 }
 
-const explorer = cosmiconfig('pkger');
-
-// check for custom tsdx.config.js
-let tsdxConfig = {
-  rollup(config: RollupOptions, _options: TsdxOptions): RollupOptions {
-    return config;
-  },
-};
-
-if (fs.existsSync(paths.appConfig)) {
-  tsdxConfig = require(paths.appConfig);
+function transformPackageJsonTask(transforms: any[] = []) {
+  const transform = (pkgJson: any) => {
+    for (var t of transforms) {
+      if (t) {
+        pkgJson = t(pkgJson);
+      }
+    }
+    return pkgJson;
+  };
+  return {
+    run: async () => {
+      const json = await fs.readJson(paths.packageJson);
+      const transformed = transform(json);
+      await fs.writeFile(
+        paths.packageJson,
+        JSON.stringify(transformed, null, 2)
+      );
+    },
+  };
 }
 
-export async function createBuildConfigs(
-  opts: NormalizedOpts
-): Promise<Array<RollupOptions & { output: OutputOptions }>> {
-  const allInputs = concatAllArray(
-    opts.input.map((input: string) =>
-      createAllFormats(opts, input).map(
-        (options: TsdxOptions, index: number) => ({
-          ...options,
-          // We want to know if this is the first run for each entryfile
-          // for certain plugins (e.g. css)
-          writeMeta: index === 0,
-        })
-      )
-    )
-  );
+async function createPkgTasks(pkg: any) {
+  const { target, format, source } = pkg;
 
-  return await Promise.all(
-    allInputs.map(async (options: TsdxOptions, index: number) => {
-      // pass the full rollup config to tsdx.config.js override
-      const config = await createRollupConfig(options, index);
-      return tsdxConfig.rollup(config, options);
-    })
-  );
-}
-
-function createAllFormats(
-  opts: NormalizedOpts,
-  input: string
-): [TsdxOptions, ...TsdxOptions[]] {
   return [
-    opts.format.includes('cjs') && {
-      ...opts,
-      format: 'cjs',
-      env: 'development',
-      input,
+    ...getRollupConfigs(pkg).map(createRollupTask),
+    format.includes('cjs') && {
+      run: async () => {
+        const outputPath = getOutputPath({ ...pkg, format: 'cjs' });
+        await fs.outputFile(
+          outputPath,
+          cjsEntryFile(pkg.entryName || pkg.name)
+        );
+      },
     },
-    opts.format.includes('cjs') && {
-      ...opts,
-      format: 'cjs',
-      env: 'production',
-      input,
-    },
-    opts.format.includes('esm') && { ...opts, format: 'esm', input },
-    opts.format.includes('umd') && {
-      ...opts,
-      format: 'umd',
-      env: 'development',
-      input,
-    },
-    opts.format.includes('umd') && {
-      ...opts,
-      format: 'umd',
-      env: 'production',
-      input,
-    },
-    opts.format.includes('system') && {
-      ...opts,
-      format: 'system',
-      env: 'development',
-      input,
-    },
-    opts.format.includes('system') && {
-      ...opts,
-      format: 'system',
-      env: 'production',
-      input,
-    },
-  ].filter(Boolean) as [TsdxOptions, ...TsdxOptions[]];
+    !pkg.root &&
+      pkg.target !== 'cli' && {
+        run: async () => {
+          fs.mkdirp(path.join(process.cwd(), pkg.entryName));
+        },
+      },
+    // format.includes('cjs') &&
+    //   cjsEntryFileTask({
+    //     ...pkg,
+    //     format: 'cjs',
+    //     env: 'development',
+    //     input: source,
+    //   }),
+  ].filter(Boolean);
 }
 
-export const build = async (dirtyOpts: BuildOpts) => {
-  let opts = await normalizeOpts(dirtyOpts);
-  const result = await explorer.search(process.cwd());
-  if (result?.config) {
-    opts = merge(result.config, opts);
-  }
-  const buildConfigs = await createBuildConfigs(opts);
+function addBin(pkg: { cmd: any; name: string }) {
+  return (pkgJson: { [x: string]: any }) => {
+    const outputPath = getOutputPath({
+      ...pkg,
+      format: 'cjs',
+    });
+    return {
+      ...pkgJson,
+      bin: {
+        ...pkgJson['bin'],
+        [pkg.cmd || safePackageName(pkg.name)]: getRelativePath(
+          process.cwd(),
+          outputPath
+        ),
+      },
+    };
+  };
+}
+
+async function createAllTasks(options: any) {
+  const { entries, ...root } = options;
+  return flatten(
+    await Promise.all([
+      createPkgTasks(root),
+      ...entries.map((entry: any) => createPkgTasks(entry)),
+      transformPackageJsonTask(
+        [
+          // add types for 'types'
+          // make sure files has everythin
+          // add module for 'esm'
+          root.format.includes('esm') &&
+            ((p: any) => ({
+              ...p,
+              module: getRelativePath(
+                process.cwd(),
+                getOutputPath({ ...root, format: 'esm' })
+              ),
+            })),
+          root.format.includes('cjs') &&
+            ((p: any) => ({
+              ...p,
+              main: getRelativePath(
+                process.cwd(),
+                getOutputPath({ ...root, format: 'cjs', env: 'production' })
+              ),
+            })),
+          // add bin for 'cli'
+          ...[entries, root]
+            .filter(entry => entry.target === 'cli')
+            .map(pkg => addBin(pkg)),
+        ].filter(Boolean)
+      ),
+    ])
+  );
+}
+
+export const build = async (cliOpts: BuildOpts) => {
+  const opts = await createConfig(cliOpts);
+  const tasks = await createAllTasks(opts);
   await cleanDistFolder();
   const logger = await createProgressEstimator();
-  if (opts.format.includes('cjs')) {
-    const promise = writeCjsEntryFile(opts.name).catch(logError);
-    logger(promise, 'Creating entry file');
-  }
   try {
     const promise = asyncro
-      .map(
-        buildConfigs,
-        async (
-          inputOptions: RollupOptions & {
-            output: OutputOptions;
-          }
-        ) => {
-          let bundle = await rollup(inputOptions);
-          await bundle.write(inputOptions.output);
-        }
-      )
+      .map(tasks, async (task: any) => {
+        await task.run();
+      })
       .catch((e: any) => {
         throw e;
       });
