@@ -1,6 +1,6 @@
 {
   "name": "pkger",
-  "version": "0.0.2-next.10",
+  "version": "0.0.2-next.11",
   "author": "Nikhil Saraf <nsaraf98@gmail.com>",
   "description": "Zero-config TypeScript package development",
   "license": "MIT",
@@ -25,9 +25,9 @@
     "target": "cli"
   },
   "scripts": {
-    "prepare": "pkger",
+    "prepare": "pkger build",
     "build": "pkger build",
-    "dev": "pkger watch"
+    "dev": "pkger"
   },
   "dependencies": {
     "@babel/core": "^7.9.0",
