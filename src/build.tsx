@@ -12,7 +12,7 @@ import * as fs from 'fs-extra';
 import { paths } from './utils';
 import flatten from 'lodash/flatten';
 import path, { join } from 'path';
-import { createRollupTask, getRollupConfigs } from './compile/rollup';
+import { createRollupTask, getRollupConfigs, showSize } from './compile/rollup';
 import { createConfig, getRelativePath } from './config';
 import { mapTasksParallel, createParallelTask } from './proc';
 
@@ -215,23 +215,51 @@ async function createAllTasks(options: any) {
   );
 }
 
-import { PROCESS, createTask, runTask } from './proc';
+import { PROCESS, createTask } from './proc';
+import React from 'react';
+import { render } from 'ink';
+import { ProcessManager, useProcessManager, Process } from './Process';
 
-export const build = async (cliOpts: BuildOpts) => {
-  const buildTask = createTask(
-    'build',
-    {
-      description: ['building', 'built', 'failed_to_build'],
-      taskType: PROCESS.PKGER,
-    },
-    async () => {
-      const opts = await createConfig(cliOpts);
-      await cleanDistFolder();
-      const tasks = await createAllTasks(opts);
-      await mapTasksParallel(tasks);
-    }
+export async function build(cliOpts: any) {
+  render(
+    <ProcessManager>
+      <Build cliOptions={cliOpts} />
+    </ProcessManager>
   );
-  await runTask(buildTask, {
-    onError: logError,
-  });
-};
+}
+
+function Build({ cliOptions }) {
+  const manager = useProcessManager();
+
+  React.useEffect(() => {
+    const pkgerProcess = manager.add('pkger', {
+      taskType: PROCESS.PKGER,
+      description: ['building', 'built', 'failed_to_build'],
+    });
+
+    pkgerProcess.start();
+    async function builder() {
+      try {
+        const opts = await createConfig(cliOptions);
+        await cleanDistFolder();
+        const tasks = await (await createAllTasks(opts)).map(
+          (task) => manager.addTask(task).task
+        );
+        await mapTasksParallel(tasks);
+        pkgerProcess.succeed();
+      } catch (e) {
+        pkgerProcess.fail();
+      }
+    }
+
+    builder();
+  }, [cliOptions]);
+
+  return (
+    <>
+      {Object.keys(manager.processes.current).map((proc) => (
+        <Process key={proc} process={proc} />
+      ))}
+    </>
+  );
+}

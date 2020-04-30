@@ -4,6 +4,7 @@ import { Color } from 'ink';
 import { Spinner } from './Spinner';
 
 import createContext from 'create-hook-context';
+import { runTask } from './proc';
 
 export const [ProcessManager, useProcessManager] = createContext(
   function useProcessManager({}: object) {
@@ -121,13 +122,16 @@ export const [ProcessManager, useProcessManager] = createContext(
           },
         };
 
-        task.onSuccess = api.succeed;
+        task.onSuccess = (result) => api.succeed({ result });
         task.onStart = api.start;
-        task.onError = api.fail;
+        task.onError = (error) => api.fail({ error });
 
         return {
           task,
           ...api,
+          runTask: async () => {
+            await runTask(task);
+          },
         };
       },
       [dispatch]
@@ -194,7 +198,7 @@ export const getCommand = (status, procType) => {
     (procType &&
       procType[
         {
-          // idle: 0,
+          idle: 1,
           running: 1,
           success: 2,
           error: 1,
@@ -226,8 +230,19 @@ export function Process({ process }) {
           <Box width="12">
             {t[0]} {getCommand(thisProcess.status, t)}
           </Box>
-          {thisProcess.description && thisProcess.description + ' '}
-          {thisProcess.message}
+          {thisProcess.description ? (
+            <>
+              {typeof thisProcess.description === 'string'
+                ? thisProcess.description
+                : thisProcess.description[thisProcess.status]}{' '}
+            </>
+          ) : (
+            ''
+          )}
+          {thisProcess.message}{' '}
+          {thisProcess.status === 'idle' || thisProcess.status === 'running' ? (
+            <Spinner type="simpleDotsScrolling" />
+          ) : null}
         </Color>
       </Box>
     </Box>

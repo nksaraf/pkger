@@ -25,12 +25,15 @@ function Watch({ cliOptions }) {
   React.useEffect(() => {
     const pkgerProcess = manager.add('pkger', {
       taskType: PROCESS.PKGER,
-      description: '',
-      message: (
-        <>
-          waiting <Spinner type="simpleDotsScrolling" />
-        </>
-      ),
+      description: {
+        idle: <Color white>waiting for changes</Color>,
+        running: 'bundling',
+        fail: (
+          <Color dim red>
+            failed bundling, waiting for changes
+          </Color>
+        ),
+      },
     });
 
     async function watcher() {
@@ -41,22 +44,18 @@ function Watch({ cliOptions }) {
         getRollupConfigs(root),
         ...entries.map((entry) => getRollupConfigs(entry)),
       ]).map(({ label, ...rollupConfig }) => {
-        // console.log(label, rollupConfig.input);
-
         return rollupConfig;
       });
 
       const rootProcess = manager.add(root.name, {
         taskType: PROCESS.COMPILE,
         description: root.name,
-        message: <Spinner type="simpleDotsScrolling" />,
       });
 
       entries.map((entry) => {
         manager.add(entry.name, {
           taskType: PROCESS.COMPILE,
           description: entry.name,
-          message: <Spinner type="simpleDotsScrolling" />,
         });
       });
 
@@ -64,13 +63,7 @@ function Watch({ cliOptions }) {
 
       rollupWatch(rollupConfigs).on('event', async (event) => {
         if (event.code === 'START') {
-          pkgerProcess.start({
-            message: (
-              <>
-                bundling changes <Spinner type="simpleDotsScrolling" />
-              </>
-            ),
-          });
+          pkgerProcess.start();
         }
 
         if (event.code === 'BUNDLE_START') {
@@ -98,30 +91,15 @@ function Watch({ cliOptions }) {
         }
 
         if (event.code === 'ERROR') {
-          pkgerProcess.fail({
-            message: 'failed bundling',
-          });
+          pkgerProcess.fail();
         }
 
         if (event.code === 'END') {
           try {
             await runTask(typescriptProcess.task);
-            pkgerProcess.succeed({
-              message: (
-                <Color dim white>
-                  waiting for changes
-                  <Spinner type="simpleDotsScrolling" />
-                </Color>
-              ),
-            });
+            pkgerProcess.reset();
           } catch (e) {
-            pkgerProcess.fail({
-              message: (
-                <Color dim white>
-                  waiting for changes <Spinner type="simpleDotsScrolling" />
-                </Color>
-              ),
-            });
+            pkgerProcess.fail();
           }
         }
       });
