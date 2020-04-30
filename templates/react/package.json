@@ -19,12 +19,15 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "magic-components": "*",
     "typescript": "*",
     "@types/react": "*",
+    "@types/node": "*",
     "@types/react-dom": "*",
     "react": "*",
     "react-dom": "*",
     "next": "*",
+    "pkger": "*",
     "@types/next": "*"
   },
   "peerDependencies": {
