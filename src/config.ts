@@ -79,7 +79,7 @@ export async function createConfig(cliOpts: any) {
   // });
 
   rootOptions.entries = entries
-    .map(entry => ({ ...entry, root: false, pkgSources }))
+    .map((entry) => ({ ...entry, root: false, pkgSources }))
     .map(resolveDependentOptions);
   rootOptions.pkgSources = pkgSources;
   return resolveDependentOptions(rootOptions);
