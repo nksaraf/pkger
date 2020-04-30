@@ -6,7 +6,7 @@
     "jsx": "react",
     "importHelpers": true,
     "esModuleInterop": true,
-    "outDir": "temp",
+    "outDir": "other",
     "declaration": false,
     "module": "commonjs",
     "rootDir": "src",

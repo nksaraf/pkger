@@ -74,7 +74,7 @@ function getInstallArgs(
   }
 }
 
-const startMessage = async function(projectName: string) {
+const startMessage = async function (projectName: string) {
   const pkgManager = await packageManager();
 
   const commands = {
@@ -104,9 +104,9 @@ const startMessage = async function(projectName: string) {
   // ${chalk.green('https://github.com/nksaraf/pkger/issues')}
 };
 
-const installingMessage = function(packages: string[]) {
+const installingMessage = function (packages: string[]) {
   const pkgText = packages
-    .map(function(pkg) {
+    .map(function (pkg) {
       return `    ${chalk.cyan(chalk.bold(pkg))}`;
     })
     .join('\n');
@@ -116,7 +116,7 @@ ${pkgText}
 `;
 };
 
-const incorrectNodeVersionMessage = function(requiredVersion: string) {
+const incorrectNodeVersionMessage = function (requiredVersion: string) {
   return `Unsupported Node version! Your current Node version (${chalk.red(
     process.version
   )}) does not satisfy the requirement of Node ${chalk.cyan(requiredVersion)}.`;
@@ -260,7 +260,7 @@ const copyTemplate = async (
   const projectPath = path.join(cwd, pkgName);
   let author = await getAuthorName(spinner);
 
-  let templateDir = path.resolve(__dirname, `../templates/${template}`);
+  let templateDir = path.resolve(__dirname, `../../templates/${template}`);
   const templateFiles: string[] = await glob('**/*', {
     cwd: templateDir,
     dot: true,
@@ -273,17 +273,18 @@ const copyTemplate = async (
   };
 
   for (var file of templateFiles) {
-    if (await isDir(path.join(templateDir, file))) {
+    const dir = await isDir(path.join(templateDir, file));
+    if (dir) {
       await fs.mkdirp(path.join(projectPath, file));
-      continue;
-    }
-    const contents = await fs.readFile(path.join(templateDir, file), {
-      encoding: 'utf-8',
-    });
+    } else {
+      const contents = await fs.readFile(path.join(templateDir, file), {
+        encoding: 'utf-8',
+      });
 
-    const renderContents = Mustache.render(contents, vars);
-    if (file !== 'package.json') {
-      await fs.writeFile(path.join(projectPath, file), renderContents);
+      const renderContents = Mustache.render(contents, vars);
+      if (file !== 'package.json') {
+        await fs.writeFile(path.join(projectPath, file), renderContents);
+      }
     }
   }
 

@@ -22,20 +22,23 @@ import { Plugin } from 'rollup';
 import MagicString from 'magic-string';
 import { getOutputPath } from '../utils';
 
-
 export function getRollupConfigs(pkg: any) {
-  const { target, format, source, name, 
-    label = str(name, format) } = pkg;
+  const { target, format, source, name, label = str(name, format) } = pkg;
 
   return [
     format.includes('esm') &&
-      getRollupConfig({ ...pkg, format: 'esm', input: source, label: str(name, 'esm') }),
+      getRollupConfig({
+        ...pkg,
+        format: 'esm',
+        input: source,
+        label: str(name, 'esm'),
+      }),
     target === 'cli' &&
       getRollupConfig({
         ...pkg,
         format: 'cjs',
         input: source,
-        label: str(name, 'cli')
+        label: str(name, 'cli'),
       }),
     format.includes('cjs') &&
       getRollupConfig({
@@ -43,7 +46,7 @@ export function getRollupConfigs(pkg: any) {
         format: 'cjs',
         env: 'production',
         input: source,
-        label: str(name, 'cjs', 'prod')
+        label: str(name, 'cjs', 'prod'),
       }),
     format.includes('cjs') &&
       getRollupConfig({
@@ -51,8 +54,7 @@ export function getRollupConfigs(pkg: any) {
         format: 'cjs',
         env: 'development',
         input: source,
-        label: str(name, 'cjs', 'dev')
-
+        label: str(name, 'cjs', 'dev'),
       }),
     // format.includes('cjs') &&
     //   cjsEntryFileTask({
@@ -91,10 +93,14 @@ function getRollupConfig(options: TsdxOptions) {
 
 export function createRollupTask(rollupConfig: any) {
   const { label = rollupConfig.input, ...config } = rollupConfig;
-    return createTask(label, PROCESS.COMPILE, async () => {
+  return createTask(
+    label,
+    { taskType: PROCESS.COMPILE, onError: console.log },
+    async () => {
       let bundle = await rollup(config);
       await bundle.write(config.output);
-    })
+    }
+  );
 }
 
 export function createRollupConfig(
@@ -124,7 +130,7 @@ export function createRollupConfig(
           extensions: extensions,
         });
         // @ts-ignore is it one of the pkg entries
-        const entry = opts.pkgSources.find(o => p === o);
+        const entry = opts.pkgSources.find((o) => p === o);
         if (!entry) {
           return false;
         }
@@ -171,7 +177,9 @@ export function createRollupConfig(
       // (i.e. import * as namespaceImportObject from...) that are accessed dynamically.
       freeze: false,
       // Respect tsconfig esModuleInterop when setting __esModule.
-      esModule: Boolean(opts.tsconfigContents.compilerOptions["esModuleInterop"]),
+      esModule: Boolean(
+        opts.tsconfigContents.compilerOptions['esModuleInterop']
+      ),
       name: opts.name || safeVariableName(opts.name),
       sourcemap: true,
       globals: { react: 'React', 'react-native': 'ReactNative' },
@@ -288,14 +296,13 @@ import { proc, PROCESS, createTask } from '../proc';
 // import greenlet from './greenlet';
 // import { info } from '../logger';
 
-export const showSize = (bundle: { code: any; fileName: any; }) => {
+export const showSize = (bundle: { code: any; fileName: any }) => {
   const { code, fileName } = bundle;
   // console.log(code);
   const size = prettyBytes(gzip.sync(code));
   return size;
   // console.log(`\t${size}\t${fileName}`);
 };
-
 
 // export function sizeme() {
 //   return {

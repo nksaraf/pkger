@@ -8,7 +8,6 @@ import { typescriptTask } from './build';
 import React from 'react';
 import { render } from 'ink';
 import { Color } from 'ink';
-import { Spinner } from './Spinner';
 import { Process, ProcessManager, useProcessManager } from './Process';
 
 export async function watch(cliOpts: any) {
@@ -23,7 +22,7 @@ function Watch({ cliOptions }) {
   const manager = useProcessManager();
 
   React.useEffect(() => {
-    const pkgerProcess = manager.add('pkger', {
+    const pkgerProcess = manager.add('watch', {
       taskType: PROCESS.PKGER,
       description: {
         idle: <Color white>waiting for changes</Color>,
@@ -99,7 +98,7 @@ function Watch({ cliOptions }) {
             await runTask(typescriptProcess.task);
             pkgerProcess.reset();
           } catch (e) {
-            pkgerProcess.fail();
+            pkgerProcess.fail(e);
           }
         }
       });

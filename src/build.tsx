@@ -232,9 +232,13 @@ function Build({ cliOptions }) {
   const manager = useProcessManager();
 
   React.useEffect(() => {
-    const pkgerProcess = manager.add('pkger', {
+    const pkgerProcess = manager.add('build', {
       taskType: PROCESS.PKGER,
-      description: ['building', 'built', 'failed_to_build'],
+      description: {
+        running: 'building',
+        success: 'built',
+        fail: 'failed to build',
+      },
     });
 
     pkgerProcess.start();
@@ -242,7 +246,7 @@ function Build({ cliOptions }) {
       try {
         const opts = await createConfig(cliOptions);
         await cleanDistFolder();
-        const tasks = await (await createAllTasks(opts)).map(
+        const tasks = (await createAllTasks(opts)).map(
           (task) => manager.addTask(task).task
         );
         await mapTasksParallel(tasks);
