@@ -11,6 +11,7 @@
     "module": "commonjs",
     "rootDir": "src",
     "strict": true,
+    "noImplicitAny": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,

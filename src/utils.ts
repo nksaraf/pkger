@@ -2,12 +2,12 @@ import * as fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 import camelCase from 'camelcase';
-import progressEstimator from 'progress-estimator';
+// import progressEstimator from 'progress-estimator';
 
 import { PackageJson } from './types';
 import execa from 'execa';
 
-export const DEBUG = false;
+export let DEBUG = false;
 
 // Remove the package name scope if it exists
 export const removeScope = (name: string) => name.replace(/^@.*\//, '');
@@ -112,14 +112,8 @@ export function logError(err: any) {
   stderr();
 }
 
-export async function createProgressEstimator() {
-  await fs.ensureDir(paths.progressEstimatorCache);
-  // @ts-ignore
-  return progressEstimator({
-    // All configuration keys are optional, but it's recommended to specify a storage location.
-    storagePath: paths.progressEstimatorCache,
-  });
-}
+
+export const str = (...args: (string | undefined)[]) => args.filter(Boolean).join(' ')
 
 export function runCommand(command?: string) {
   if (!command) {

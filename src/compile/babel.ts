@@ -1,4 +1,3 @@
-// @ts-nocheck
 // import { createConfigItem } from '@babel/core';
 // import babelPlugin from 'rollup-plugin-babel';
 // import merge from 'lodash.merge';
@@ -29,12 +28,12 @@ let hasReact = (pkg: string) =>
 
 export const babelConfig = (options: any) => {
   const extensions = [...DEFAULT_EXTENSIONS, '.ts', '.tsx', '.json', '.node'];
-  const { browserlist, format } = options;
+  const { browserlist, format , jsx} = options;
 
   // Note: when using `React`, presetTs needs `React` as jsxPragma,
   // vs presetReact needs `React.createElement`,
   // but when using `h` as pragma, both presets needs it to be just `h`
-  let [jsxPragma, pragma, pragmaFrag] = hasReact(options)
+  let [jsxPragma, pragma, pragmaFrag] = jsx !== "react" ? [jsx, jsx, jsx] : hasReact(options)
     ? ['React', 'React.createElement', 'React.Fragment']
     : ['h', 'h', 'h'];
 
@@ -46,7 +45,7 @@ export const babelConfig = (options: any) => {
         loose: true,
         useBuiltIns: false,
         modules: false,
-        targets: options.target === 'node' ? { node: '12' } : { esmodules: true},
+        targets: options.target === 'browser' ? { esmodules: true } : { node: '12' },
         exclude: ['transform-async-to-generator', 'transform-regenerator'],
       },
     ],
@@ -58,7 +57,7 @@ export const babelConfig = (options: any) => {
     [pluginObjectRestSpread, { loose: true, useBuiltIns: true }],
     [pluginAsyncToPromise, { inlineHelpers: true, externalHelpers: true }],
     // [pluginDecorators, { legacy: true }],
-    [pluginClassProperties, { loose: false }],
+    [pluginClassProperties, { loose: true }],
     [pluginTransformRegen, { async: false }],
     [pluginNullOperator],
     [pluginOptionalChaining],

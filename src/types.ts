@@ -10,6 +10,7 @@ interface SharedOpts {
 export type ModuleFormat = 'cjs' | 'umd' | 'esm' | 'system';
 
 export interface BuildOpts extends SharedOpts {
+  silent: any;
   name?: string;
   entry?: string | string[];
   format: string;

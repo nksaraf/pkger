@@ -25,15 +25,13 @@ prog.command('check')
   .option('--tsconfig', 'Specify custom tsconfig path')
   .example('watch --tsconfig ./tsconfig.foo.json')
   .action(async (cliOpts) => {
-    console.log('here');
-    console.log(cliOpts);
     console.log(await runCommand(`tsc -p ${cliOpts.tsconfig}`));
   })
 
 prog
-  .command('watch')
+  .command('watch', '', { default: true })
   .describe('Rebuilds on any change')
-  .option('--entry, -i', 'Entry module(s)')
+  .option('--source, --entry, -i', 'Entry module(s)')
   .example('watch --entry src/foo.tsx')
   .option('--target', 'Specify your target environment')
   .example('watch --target node')
@@ -46,8 +44,8 @@ prog
     'Keep outdated console output in watch mode instead of clearing the screen'
   )
   .example('watch --verbose')
-  .option('--noClean', "Don't clean the dist folder", '')
-  .example('watch --noClean')
+  // .option('--noClean', "Don't clean the dist folder", '')
+  // .example('watch --noClean')
   .option('--tsconfig', 'Specify custom tsconfig path')
   .example('watch --tsconfig ./tsconfig.foo.json')
   .option('--onFirstSuccess', 'Run a command on the first successful build')
@@ -56,14 +54,14 @@ prog
   .example('watch --onSuccess "echo Successful build!"')
   .option('--onFailure', 'Run a command on a failed build')
   .example('watch --onFailure "The build failed!"')
-  .option('--transpileOnly', 'Skip type checking')
-  .example('watch --transpileOnly')
-  .option('--extractErrors', 'Extract invariant errors to ./errors/codes.json.')
-  .example('watch --extractErrors')
+  // .option('--transpileOnly', 'Skip type checking')
+  // .example('watch --transpileOnly')
+  // .option('--extractErrors', 'Extract invariant errors to ./errors/codes.json.')
+  // .example('watch --extractErrors')
   .action(watch);
 
 prog
-  .command('build', '', { default: true })
+  .command('build')
   .describe('Build your project once and exit')
   .option('--source, --entry, -i,', 'Entry module(s)')
   .example('build --source src/foo.tsx')
@@ -71,6 +69,7 @@ prog
   .example('build --target node')
   .option('--name', 'Specify name exposed in UMD builds')
   .example('build --name Foo')
+  .option('--silent', 'Silent out')
   .option('--format', 'Specify module format(s)')
   .example('build --format cjs,esm')
   .option('--tsconfig', 'Specify custom tsconfig path')
