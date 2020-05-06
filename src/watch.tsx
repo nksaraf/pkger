@@ -35,6 +35,19 @@ function Watch({ cliOptions }) {
       },
     });
 
+    const buildProcess = manager.add('build', {
+      taskType: PROCESS.PKGER,
+      description: {
+        idle: <Color white>waiting for changes</Color>,
+        running: 'bundling',
+        fail: (
+          <Color dim red>
+            failed bundling, waiting for changes
+          </Color>
+        ),
+      },
+    });
+
     async function watcher() {
       const options = await createConfig(cliOptions);
 

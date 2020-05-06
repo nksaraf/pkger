@@ -47,7 +47,7 @@ export async function createConfig(cliOpts: any) {
   );
 
   const sourceDir = path.dirname(rootOptions.source);
-  const pkgSources: string[] = [];
+  const allEntries: string[] = [rootOptions];
   const entries: any[] = (rootOptions.entries || []).map(
     (option: string | any) => {
       const pkgName = typeof option === 'string' ? option : option.name;
@@ -65,7 +65,7 @@ export async function createConfig(cliOpts: any) {
           ? { name, source, entryName: pkgName }
           : { ...option, name, source, entryName: pkgName };
       const entryOption = defaults(baseEntryOption, rootOptions);
-      pkgSources.push(path.join(cwd, entryOption.source));
+      allEntries.push(entryOption);
       return entryOption;
     }
   );
@@ -79,9 +79,9 @@ export async function createConfig(cliOpts: any) {
   // });
 
   rootOptions.entries = entries
-    .map((entry) => ({ ...entry, root: false, pkgSources }))
+    .map((entry) => ({ ...entry, root: false, allEntries }))
     .map(resolveDependentOptions);
-  rootOptions.pkgSources = pkgSources;
+  rootOptions.allEntries = allEntries;
   return resolveDependentOptions(rootOptions);
 }
 

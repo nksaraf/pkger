@@ -6,6 +6,7 @@ import json from '@rollup/plugin-json';
 import replace from '@rollup/plugin-replace';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import resolve from 'resolve';
+import alias from '@rollup/plugin-alias';
 
 // import sourceMaps from 'rollup-plugin-sourcemaps';
 // import typescript from 'rollup-plugin-typescript2';
@@ -116,12 +117,22 @@ export function createRollupConfig(
     external: (source: string, importer: string) => {
       if (source === 'babel-plugin-transform-async-to-promises/helpers') {
         return false;
-      } else if (!source.startsWith('.') && !path.isAbsolute(source)) {
+      } else if (
+        !(
+          source.startsWith('.') ||
+          path.isAbsolute(source) ||
+          source.startsWith('@')
+        )
+      ) {
         return true;
       }
 
       try {
-        if (!opts.pkgSources) {
+        if (!opts.allEntries) {
+          return false;
+        }
+
+        if (source.startsWith('@')) {
           return false;
         }
         // what is the imported file path
@@ -130,7 +141,10 @@ export function createRollupConfig(
           extensions: extensions,
         });
         // @ts-ignore is it one of the pkg entries
-        const entry = opts.pkgSources.find((o) => p === o);
+        const cwd = process.cwd();
+        const entry = opts.allEntries.find(
+          (o) => p === path.join(process.cwd(), o.source)
+        );
         if (!entry) {
           return false;
         }
@@ -186,6 +200,12 @@ export function createRollupConfig(
       exports: 'named',
     },
     plugins: [
+      alias({
+        entries: opts.allEntries.map((e) => ({
+          find: `@${e.entryName ?? e.name}`,
+          replacement: `./${e.entryName ?? e.name}`,
+        })),
+      }),
       nodeResolve({
         mainFields: [
           'module',
