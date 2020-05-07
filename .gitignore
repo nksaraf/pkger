@@ -9,3 +9,5 @@ package-lock.json
 .netlify
 example
 temp
+other
+_pkger
