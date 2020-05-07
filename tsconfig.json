@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "archive/__div"],
   "exclude": ["src/template/**/*"],
   "compilerOptions": {
     "allowJs": true,

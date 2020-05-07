@@ -1,3 +1,7 @@
+import { GluegunCommand } from 'gluegun';
+import React from 'react';
+import { Box } from 'ink';
+
 import asyncro from 'asyncro';
 import {
   safePackageName,
@@ -6,15 +10,19 @@ import {
   runCommand,
   str,
   logError,
-} from './utils';
-import { BuildOpts } from './types';
+} from '../utils';
+import { BuildOpts } from '../types';
 import * as fs from 'fs-extra';
-import { paths } from './utils';
+import { paths } from '../utils';
 import flatten from 'lodash/flatten';
 import path, { join } from 'path';
-import { createRollupTask, getRollupConfigs, showSize } from './compile/rollup';
-import { createConfig, getRelativePath } from './config';
-import { mapTasksParallel, createParallelTask } from './proc';
+import {
+  createRollupTask,
+  getRollupConfigs,
+  showSize,
+} from '../compile/rollup';
+import { getRelativePath } from '../extensions/config';
+import { mapTasksParallel, createParallelTask } from '../proc';
 
 export function cjsEntryFile(name: string) {
   const baseLine = `module.exports = require('./`;
@@ -215,20 +223,16 @@ async function createAllTasks(options: any) {
   );
 }
 
-import { PROCESS, createTask } from './proc';
-import React from 'react';
-import { render } from 'ink';
-import { ProcessManager, useProcessManager, Process } from './Process';
+import { PROCESS, createTask } from '../proc';
+import {
+  ProcessManager,
+  useProcessManager,
+  Process,
+} from '../components/Process';
+import { useToolbox } from '../components/Toolbox';
 
-export async function build(cliOpts: any) {
-  render(
-    <ProcessManager>
-      <Build cliOptions={cliOpts} />
-    </ProcessManager>
-  );
-}
-
-function Build({ cliOptions }) {
+function Build() {
+  const toolbox = useToolbox();
   const manager = useProcessManager();
 
   React.useEffect(() => {
@@ -244,9 +248,9 @@ function Build({ cliOptions }) {
     pkgerProcess.start();
     async function builder() {
       try {
-        const opts = await createConfig(cliOptions);
+        const config = toolbox.config;
         await cleanDistFolder();
-        const tasks = (await createAllTasks(opts)).map(
+        const tasks = (await createAllTasks(config)).map(
           (task) => manager.addTask(task).task
         );
         await mapTasksParallel(tasks);
@@ -257,7 +261,7 @@ function Build({ cliOptions }) {
     }
 
     builder();
-  }, [cliOptions]);
+  }, []);
 
   return (
     <>
@@ -267,3 +271,16 @@ function Build({ cliOptions }) {
     </>
   );
 }
+
+export default {
+  name: 'build',
+  run: async (toolbox) => {
+    const { print, render } = toolbox;
+
+    render(
+      <ProcessManager>
+        <Build />
+      </ProcessManager>
+    );
+  },
+} as GluegunCommand;

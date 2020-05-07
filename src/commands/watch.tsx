@@ -1,25 +1,36 @@
-import { createConfig } from './config';
 import { watch as rollupWatch } from 'rollup';
-import { getRollupConfigs, showSize } from './compile/rollup';
+import { getRollupConfigs, showSize } from '../compile/rollup';
 import flatten from 'lodash/flatten';
-import { PROCESS, runTask } from './proc';
+import { PROCESS, runTask } from '../proc';
 import { typescriptTask } from './build';
 
 import React from 'react';
 import { render } from 'ink';
 import { Color } from 'ink';
-import { Process, ProcessManager, useProcessManager } from './Process';
+import {
+  Process,
+  ProcessManager,
+  useProcessManager,
+} from '../components/Process';
+import { GluegunCommand } from 'gluegun';
+import { useToolbox } from '../components/Toolbox';
 
-export async function watch(cliOpts: any) {
-  render(
-    <ProcessManager>
-      <Watch cliOptions={cliOpts} />
-    </ProcessManager>
-  );
-}
+export default {
+  name: 'watch',
+  run: async (toolbox) => {
+    const { print, render } = toolbox;
 
-function Watch({ cliOptions }) {
+    render(
+      <ProcessManager>
+        <Watch />
+      </ProcessManager>
+    );
+  },
+} as GluegunCommand;
+
+function Watch() {
   const manager = useProcessManager();
+  const toolbox = useToolbox();
 
   React.useEffect(() => {
     const pkgerProcess = manager.add('watch', {
@@ -49,7 +60,7 @@ function Watch({ cliOptions }) {
     });
 
     async function watcher() {
-      const options = await createConfig(cliOptions);
+      const options = toolbox.config;
 
       const { entries, ...root } = options;
       let rollupConfigs = flatten([
@@ -117,7 +128,7 @@ function Watch({ cliOptions }) {
       });
     }
     watcher();
-  }, [cliOptions]);
+  }, []);
 
   return (
     <>

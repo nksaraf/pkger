@@ -1,18 +1,18 @@
+import { GluegunToolbox } from 'gluegun';
+
 import path from 'path';
 import defaults from 'lodash/defaults';
 import resolve from 'resolve';
 import * as fs from 'fs-extra';
-import { cosmiconfig } from 'cosmiconfig';
-import { PackageJson, TsdxOptions } from './types';
+import { PackageJson, TsdxOptions } from '../types';
 import { RollupOptions } from 'rollup';
-import { paths, DEBUG } from './utils';
+import { paths, DEBUG } from '../utils';
 
-const explorer = cosmiconfig('pkger');
-
-export async function createConfig(cliOpts: any) {
+export async function createConfig(toolbox: GluegunToolbox) {
   const cwd = process.cwd();
+  const cliOpts = { ...toolbox.config };
 
-  const config = (await explorer.search(cwd))?.config ?? {};
+  const config = toolbox.config.loadConfig(process.cwd(), 'pkger');
   const packageJson = await loadPackageJson();
 
   const name = path.basename(cwd);
@@ -159,3 +159,12 @@ export function resolveEntry(cwd: string) {
   } catch (e) {}
   return;
 }
+
+// add your CLI-specific functionality here, which will then be accessible
+// to your commands
+export default async (toolbox: GluegunToolbox) => {
+  // enable this if you want to read configuration in from
+  // the current folder's package.json (in a "pkger" property),
+  // pkger.config.json, etc.
+  toolbox.config = await createConfig(toolbox);
+};

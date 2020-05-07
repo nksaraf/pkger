@@ -19,7 +19,7 @@
     "url": "https://github.com/nksaraf/pkger/issues"
   },
   "bin": {
-    "pkger": "dist/cjs/pkger.js"
+    "pkger": "bin/pkger"
   },
   "pkger": {
     "target": "cli"
@@ -93,6 +93,7 @@
     "spinnies": "^0.5.1",
     "threads": "^1.4.1",
     "tiny-glob": "^0.2.6",
+    "ts-node": "^8.10.1",
     "web-worker": "^1.0.0",
     "workerize": "^0.1.8"
   },

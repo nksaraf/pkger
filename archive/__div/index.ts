@@ -1,12 +1,12 @@
 import sade from 'sade';
-import { create, templates } from './create';
-import { build } from './build';
-import { watch } from './watch';
+import { create, templates } from '../../src/commands/create';
+import { build } from '../../src/build';
+import { watch } from '../../src/commands/watch';
 // @ts-ignore
 import { version } from '../package.json';
 
 import chalk from 'chalk';
-import { runCommand } from './utils';
+import { runCommand } from '../../src/utils';
 
 const prog = sade('pkger').version(version);
 
@@ -208,7 +208,7 @@ prog
 //     }
 //   );
 
-prog.parse(process.argv);
+// prog.parse(process.argv);
 
 // export const header = chalk.red(`       __.
 //  __.--'   \\

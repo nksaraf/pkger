@@ -4,7 +4,7 @@ import { Color } from 'ink';
 import { Spinner } from './Spinner';
 
 import { createContext } from 'create-hook-context';
-import { runTask } from './proc';
+import { runTask } from '../proc';
 
 export const [ProcessManager, useProcessManager] = createContext(
   function useProcessManager({}: object) {
