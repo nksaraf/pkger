@@ -1,33 +1,18 @@
-import padEnd from 'lodash/padEnd';
-import chalk from 'chalk';
-import { str } from './utils';
 import asyncro from 'asyncro';
+import { GluegunToolbox } from 'gluegun';
 
-const PROC_WIDTH = 12;
-const SPINNER_PADDING = '  ';
-const TAB_WIDTH = 2;
-const TAB = '  ';
-
-export function proc(command: string): string {
-  return padEnd(command, 12, ' ');
-}
-
-export function tab(command: string): string {
-  return SPINNER_PADDING + TAB + padEnd(command, PROC_WIDTH - TAB_WIDTH, ' ');
-}
-
-interface TaskEventHandlers {
+export interface TaskEventHandlers {
   onError?: (error: any, task: Task) => void;
   onSuccess?: (result: string | undefined, task: Task) => void;
   onStart?: (task: Task) => void;
 }
 
-interface TaskConfig extends TaskEventHandlers, Record<string, any> {
+export interface TaskConfig extends TaskEventHandlers, Record<string, any> {
   name?: string;
   taskType?: any;
 }
 
-interface Task extends TaskConfig {
+export interface Task extends TaskConfig {
   run: () => void | Promise<void> | Promise<string | undefined>;
 }
 
@@ -43,10 +28,6 @@ export const createTask = (
     ...config,
   };
 };
-
-// export function createSpinnies() {
-//   return new Spinnies({ color: 'cyan', spinnerColor: 'cyan' });
-// }
 
 export async function runTask(
   task: Task,
@@ -113,32 +94,26 @@ export const PROCESS = {
   PKGER: ['👷', 'pkger', 'pkger', 'yellow', 'greenBright', 'bold'],
 };
 
-// const processManager = () => {};
+declare module 'gluegun' {
+  interface GluegunTask {
+    create: typeof createTask;
+    createParallel: typeof createParallelTask;
+    mapParallel: typeof mapTasksParallel;
+    run: typeof runTask;
+    TYPES: typeof PROCESS;
+  }
 
-// export const getSpinner = (spinnies: any, task: any, index: any) => {
-//   return {
-//     add: (message?: string) =>
-//       spinnies.add(index, {
-//         text: (chalk as any)[task.process[2]](
-//           str(proc(task.process[0]), Array.isArray(task.description) ? task.description[0] : task.description, ...(Array.isArray(message) ? message : [message]), '...')
-//         ),
-//       }),
-//     succeed: (message?: string) => {
-//       return spinnies.succeed(index, {
-//         text: (chalk as any)[task.process[3]](
-//           str(proc(task.process[1]), Array.isArray(task.description) ? task.description[1] : task.description, ...(Array.isArray(message) ? message : [message]))
-//         ),
-//       })
-//     },
+  interface GluegunToolbox {
+    task: GluegunTask;
+  }
+}
 
-//     fail: (message?: string) =>
-//       spinnies.fail(index, {
-//         text: (chalk as any)[task.process[4]](
-//           str(proc(task.process[0]), Array.isArray(task.description) ? task.description[2] : task.description, ...(Array.isArray(message) ? message : [message]))
-//         ),
-//       }),
-//     pick: () => {
-//       return spinnies.pick(index)
-//     }
-//   };
-// };
+export default (toolbox: GluegunToolbox) => {
+  toolbox.task = {
+    create: createTask,
+    createParallel: createParallelTask,
+    mapParallel: mapTasksParallel,
+    run: runTask,
+    TYPES: PROCESS,
+  };
+};

@@ -19,6 +19,7 @@ import pluginOptionalChaining from '@babel/plugin-proposal-optional-chaining';
 import pluginTransformRegen from '@babel/plugin-transform-regenerator';
 // import pluginStyledComponents from 'babel-plugin-styled-components';
 import pluginMacros from 'babel-plugin-macros';
+import { GluegunToolbox } from 'gluegun';
 
 let hasReact = (pkg: string) =>
   ['dependencies', 'devDependencies', 'peerDependencies'].reduce(
@@ -28,14 +29,17 @@ let hasReact = (pkg: string) =>
 
 export const babelConfig = (options: any) => {
   const extensions = [...DEFAULT_EXTENSIONS, '.ts', '.tsx', '.json', '.node'];
-  const { browserlist, format , jsx} = options;
+  const { browserlist, format, jsx } = options;
 
   // Note: when using `React`, presetTs needs `React` as jsxPragma,
   // vs presetReact needs `React.createElement`,
   // but when using `h` as pragma, both presets needs it to be just `h`
-  let [jsxPragma, pragma, pragmaFrag] = jsx !== "react" ? [jsx, jsx, jsx] : hasReact(options)
-    ? ['React', 'React.createElement', 'React.Fragment']
-    : ['h', 'h', 'h'];
+  let [jsxPragma, pragma, pragmaFrag] =
+    jsx !== 'react'
+      ? [jsx, jsx, jsx]
+      : hasReact(options)
+      ? ['React', 'React.createElement', 'React.Fragment']
+      : ['h', 'h', 'h'];
 
   const presets = [
     [
@@ -45,7 +49,8 @@ export const babelConfig = (options: any) => {
         loose: true,
         useBuiltIns: false,
         modules: false,
-        targets: options.target === 'browser' ? { esmodules: true } : { node: '12' },
+        targets:
+          options.target === 'browser' ? { esmodules: true } : { node: '12' },
         exclude: ['transform-async-to-generator', 'transform-regenerator'],
       },
     ],
@@ -66,4 +71,20 @@ export const babelConfig = (options: any) => {
   ];
 
   return { presets, plugins, extensions };
+};
+
+declare module 'gluegun' {
+  interface GluegunBabel {
+    createConfig: typeof babelConfig;
+  }
+
+  interface GluegunToolbox {
+    babel: GluegunBabel;
+  }
+}
+
+export default (toolbox: GluegunToolbox) => {
+  toolbox.babel = {
+    createConfig: babelConfig,
+  };
 };

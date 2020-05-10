@@ -57,13 +57,6 @@ export function getRollupConfigs(pkg: any) {
         input: source,
         label: str(name, 'cjs', 'dev'),
       }),
-    // format.includes('cjs') &&
-    //   cjsEntryFileTask({
-    //     ...pkg,
-    //     format: 'cjs',
-    //     env: 'development',
-    //     input: source,
-    //   }),
   ].filter(Boolean);
 }
 
@@ -76,21 +69,12 @@ function getRollupConfig(options: TsdxOptions) {
         : options.env === 'production',
     outputFile: getOutputPath(options),
   };
-  const config = createRollupConfig(options, 0);
+  const config = createRollupConfig(options);
   // @ts-ignore
   const rollupConfig = options.rollup(config, options);
   rollupConfig.label = options.label;
   return rollupConfig;
 }
-
-// const rollupWorker = workerize(`
-// import { rollup } from 'rollup';
-
-// export async function build(config) {
-//   let bundle = await rollup(config);
-//   await bundle.write(config.output);
-// };
-// `)
 
 export function createRollupTask(rollupConfig: any) {
   const { label = rollupConfig.input, ...config } = rollupConfig;
@@ -105,8 +89,8 @@ export function createRollupTask(rollupConfig: any) {
 }
 
 export function createRollupConfig(
-  opts: TsdxOptions,
-  outputNum: number
+  opts: TsdxOptions
+  // outputNum: number
 ): Promise<RollupOptions> {
   const { presets, plugins, extensions } = babelConfig(opts);
   return {
@@ -309,10 +293,8 @@ function preserveShebangs({ shebang }: { shebang: string }) {
  */
 import gzip from 'gzip-size';
 import prettyBytes from 'pretty-bytes';
-import { config } from 'shelljs';
-import padEnd from 'lodash/padEnd';
-import chalk from 'chalk';
-import { proc, PROCESS, createTask } from '../proc';
+import { PROCESS, createTask } from './task';
+import { GluegunToolbox } from 'gluegun';
 // import greenlet from './greenlet';
 // import { info } from '../logger';
 
@@ -324,16 +306,18 @@ export const showSize = (bundle: { code: any; fileName: any }) => {
   // console.log(`\t${size}\t${fileName}`);
 };
 
-// export function sizeme() {
-//   return {
-//     name: 'sizeme',
-//     generateBundle(_: any, bundle: { [x: string]: any; }, isWrite: any) {
-//       if (isWrite) {
-//         Object.keys(bundle)
-//           .map((file) => bundle[file])
-//           .filter((bundle) => !bundle.isAsset)
-//           .forEach((bundle) => showSize(bundle));
-//       }
-//     },
-//   };
-// };
+declare module 'gluegun' {
+  interface GluegunRollup {
+    createTask: typeof createRollupTask;
+  }
+
+  interface GluegunToolbox {
+    rollup: GluegunRollup;
+  }
+}
+
+export default (toolbox: GluegunToolbox) => {
+  toolbox.rollup = {
+    createTask: createRollupTask,
+  };
+};

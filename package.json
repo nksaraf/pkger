@@ -19,10 +19,12 @@
     "url": "https://github.com/nksaraf/pkger/issues"
   },
   "bin": {
-    "pkger": "bin/pkger"
+    "pkger": "dist/cjs/pkger.js"
   },
   "pkger": {
-    "target": "cli"
+    "target": "cli",
+    "source": "./src/cli.ts",
+    "builder": "tsc"
   },
   "scripts": {
     "prepare": "pkger build",
@@ -66,7 +68,7 @@
     "enquirer": "^2.3.5",
     "execa": "4.0.0",
     "fs-extra": "^9.0.0",
-    "gluegun": "^4.3.0",
+    "gluegun": "^4.3.1",
     "greenlet": "^1.1.0",
     "gzip-size": "^5.1.1",
     "ink": "^2.7.1",

@@ -1,20 +1,27 @@
 {
-  "include": ["src/**/*", "archive/__div"],
-  "exclude": ["src/template/**/*"],
   "compilerOptions": {
-    "allowJs": true,
-    "jsx": "react",
-    "importHelpers": true,
-    "esModuleInterop": true,
-    "outDir": "other",
-    "declaration": false,
+    "experimentalDecorators": true,
+    "lib": [
+      "es2015",
+      "scripthost",
+      "es2015.promise",
+      "es2015.generator",
+      "es2015.iterable",
+      "dom"
+    ],
     "module": "commonjs",
-    "rootDir": "src",
-    "strict": true,
+    "moduleResolution": "node",
+    "skipDefaultLibCheck": true,
     "noImplicitAny": false,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": true,
-    "target": "es2017"
-  }
+    "noImplicitThis": true,
+    "sourceMap": false,
+    "inlineSourceMap": true,
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "jsx": "react",
+    "strict": false,
+    "target": "es5"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "src/templates/**/*"]
 }
