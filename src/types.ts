@@ -1,3 +1,5 @@
+import { GluegunToolbox } from 'gluegun';
+
 interface SharedOpts {
   // JS target
   target: 'node' | 'browser' | 'cli';
@@ -62,3 +64,5 @@ export interface PackageJson {
     node?: string;
   };
 }
+
+export interface Toolbox extends GluegunToolbox {}

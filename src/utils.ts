@@ -32,7 +32,7 @@ export const safePackageName = (name: string) =>
 // https://github.com/facebookincubator/create-react-app/issues/637
 export const pkgDirectory = fs.realpathSync(process.cwd());
 
-export const resolvePkgPath = function(relativePath: string) {
+export const resolvePkgPath = function (relativePath: string) {
   return path.resolve(pkgDirectory, relativePath);
 };
 
@@ -45,7 +45,6 @@ export const paths = {
   // appErrorsJson: resolveApp('errors/codes.json'),
   // appErrors: resolveApp('errors'),
   appDist: resolvePkgPath('dist'),
-  appConfig: resolvePkgPath('tsdx.config.js'),
   // jestConfig: resolveApp('jest.config.js'),
   progressEstimatorCache: resolvePkgPath(
     'node_modules/.cache/.progress-estimator'
@@ -73,21 +72,22 @@ export function getReactVersion({
 export const isDir = (name: string) =>
   fs
     .stat(name)
-    .then(stats => stats.isDirectory())
+    .then((stats) => stats.isDirectory())
     .catch(() => false);
 
 export const isFile = (name: string) =>
   fs
     .stat(name)
-    .then(stats => stats.isFile())
+    .then((stats) => stats.isFile())
     .catch(() => false);
 
 const stderr = console.error.bind(console);
 
 export function logError(err: any) {
   const error = err.error || err;
-  const description = `${error.name ? error.name + ': ' : ''}${error.message ||
-    error}`;
+  const description = `${error.name ? error.name + ': ' : ''}${
+    error.message || error
+  }`;
   const message = error.plugin
     ? error.plugin === 'rpt2'
       ? `(typescript) ${description}`
@@ -112,8 +112,8 @@ export function logError(err: any) {
   stderr();
 }
 
-
-export const str = (...args: (string | undefined)[]) => args.filter(Boolean).join(' ')
+export const str = (...args: (string | undefined)[]) =>
+  args.filter(Boolean).join(' ');
 
 export function runCommand(command?: string) {
   if (!command) {
@@ -122,7 +122,7 @@ export function runCommand(command?: string) {
 
   const [exec, ...args] = command.split(' ');
   return execa(exec, args, {
-    stdio: 'inherit',
+    stdio: 'pipe',
   });
 }
 

@@ -3,7 +3,7 @@ import { build } from 'gluegun';
 /**
  * Create the cli and kick it off
  */
-async function run(argv) {
+export async function run(argv) {
   // create a CLI runtime
   const cli = build()
     .brand('pkger')
@@ -19,11 +19,8 @@ async function run(argv) {
   // this can improve performance if they're not necessary for your project:
   // .exclude(['meta', 'strings', 'print', 'filesystem', 'semver', 'system', 'prompt', 'http', 'template', 'patching', 'package-manager'])
   // and run it
-  console.log(cli);
   const toolbox = await cli.run(argv);
 
   // send it back (for testing, mostly)
   return toolbox;
 }
-
-module.exports = { run };

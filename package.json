@@ -4,7 +4,6 @@
   "author": "Nikhil Saraf <nsaraf98@gmail.com>",
   "description": "Zero-config TypeScript package development",
   "license": "MIT",
-  "target": "cli",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nksaraf/pkger.git"
@@ -19,12 +18,12 @@
     "url": "https://github.com/nksaraf/pkger/issues"
   },
   "bin": {
-    "pkger": "dist/cjs/pkger.js"
+    "pkger": "bin/pkger"
   },
   "pkger": {
+    "builder": "tsc",
     "target": "cli",
-    "source": "./src/cli.ts",
-    "builder": "tsc"
+    "source": "./src/cli.ts"
   },
   "scripts": {
     "prepare": "pkger build",
@@ -79,7 +78,6 @@
     "mustache": "^4.0.1",
     "ora": "^4.0.4",
     "pascal-case": "^3.1.1",
-    "pkger": "^0.0.2-next.13",
     "prettier": "^2.0.5",
     "pretty-bytes": "^5.3.0",
     "progress-estimator": "^0.2.2",

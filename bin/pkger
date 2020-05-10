@@ -3,15 +3,14 @@
 /* tslint:disable */
 // check if we're running in dev mode
 var devMode = require('fs').existsSync(`${__dirname}/../src`);
-// var devMode = false;
-// or want to "force" running the compiled version with --compiled-build
-var wantsCompiled = process.argv.indexOf('--compiled-build') >= 0;
+var prodBuild = !(process.argv.indexOf('--dev') >= 0);
 
-if (wantsCompiled || !devMode) {
+if (prodBuild || !devMode) {
   // this runs from the compiled javascript source
   var cli = require(`${__dirname}/../dist/cli`);
   cli.run(process.argv);
 } else {
+  console.log('pkger dev');
   // this runs from the typescript source (for dev only)
   // hook into ts-node so we can run typescript on the fly
   require('ts-node').register({

@@ -1,4 +1,4 @@
-import { GluegunToolbox } from 'gluegun';
+import { Toolbox, GluegunToolbox } from 'gluegun';
 import path, { PlatformPath } from 'path';
 import resolve from 'resolve';
 
@@ -36,12 +36,12 @@ declare module 'gluegun' {
     resolveEntry: (cwd: string) => string | undefined;
   }
 
-  interface GluegunToolbox {
+  interface Toolbox extends GluegunToolbox {
     path: GluegunPath;
   }
 }
 
-export default (toolbox: GluegunToolbox) => {
+export default (toolbox: Toolbox) => {
   function firstExistingPath(
     pathsToTry: string[],
     defaultPath?: string,

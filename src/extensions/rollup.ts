@@ -83,7 +83,7 @@ export function createRollupTask(rollupConfig: any) {
     { taskType: PROCESS.COMPILE, onError: console.log },
     async () => {
       let bundle = await rollup(config);
-      await bundle.write(config.output);
+      return await bundle.write(config.output);
     }
   );
 }
@@ -294,7 +294,7 @@ function preserveShebangs({ shebang }: { shebang: string }) {
 import gzip from 'gzip-size';
 import prettyBytes from 'pretty-bytes';
 import { PROCESS, createTask } from './task';
-import { GluegunToolbox } from 'gluegun';
+import { Toolbox } from 'gluegun';
 // import greenlet from './greenlet';
 // import { info } from '../logger';
 
@@ -311,12 +311,12 @@ declare module 'gluegun' {
     createTask: typeof createRollupTask;
   }
 
-  interface GluegunToolbox {
+  interface Toolbox {
     rollup: GluegunRollup;
   }
 }
 
-export default (toolbox: GluegunToolbox) => {
+export default (toolbox: Toolbox) => {
   toolbox.rollup = {
     createTask: createRollupTask,
   };

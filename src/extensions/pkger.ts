@@ -11,7 +11,7 @@ import { createTask, PROCESS, createParallelTask } from './task';
 import path, { PlatformPath } from 'path';
 import { getRollupConfigs, createRollupTask } from './rollup';
 import { flatten } from 'lodash';
-import { GluegunToolbox } from 'gluegun';
+import { Toolbox, GluegunToolbox } from 'gluegun';
 
 export function cjsEntryFile(name: string) {
   const baseLine = `module.exports = require('./`;
@@ -193,6 +193,15 @@ export function packageTasks(pkg: any) {
     { taskType: PROCESS.COMPILE }
   );
 }
+declare module 'gluegun' {
+  interface GluegunPkger {
+    build: (options: any) => Promise<any[]>;
+  }
+
+  interface Toolbox extends GluegunToolbox {
+    pkger: GluegunPkger;
+  }
+}
 
 export function typescriptTask(options: any) {
   return createTask('typescript', { taskType: PROCESS.EMIT }, async () => {
@@ -200,51 +209,34 @@ export function typescriptTask(options: any) {
   });
 }
 
-async function createAllTasks(options: any) {
-  const { entries, ...root } = options;
-  return flatten(
-    await Promise.all([
-      ...(root.builder === 'rollup'
-        ? [
+export default (toolbox: Toolbox) => {
+  async function build(options: any) {
+    const { entries, ...root } = options;
+    if (root.builder === 'rollup') {
+      return flatten(
+        await Promise.all(
+          [
             packageTasks(root),
             ...entries.map((entry: any) => packageTasks(entry)),
             transformPackageJsonTask(options, []),
-            typescriptTask(options),
-          ]
-        : [typescriptTask(options)]),
-    ])
-  );
-}
+            root.typecheck && typescriptTask(options),
+          ].filter(Boolean)
+        )
+      );
+    } else if (root.builder === 'tsc') {
+      const task = toolbox.task?.create(
+        'typescript',
+        { taskType: PROCESS.EMIT },
+        async () => {
+          return await runCommand(`tsc -p ${options.tsconfig}`);
+        }
+      );
+      return [task];
+    }
 
-async function build(options: any) {
-  const { entries, ...root } = options;
-  if (root.builder === 'rollup') {
-    return flatten(
-      await Promise.all([
-        packageTasks(root),
-        ...entries.map((entry: any) => packageTasks(entry)),
-        transformPackageJsonTask(options, []),
-        typescriptTask(options),
-      ])
-    );
-  } else if (root.builder === 'tsc') {
-    return [typescriptTask(options)];
+    return [];
   }
 
-  return [];
-}
-
-declare module 'gluegun' {
-  interface GluegunPkger {
-    build: typeof build;
-  }
-
-  interface GluegunToolbox {
-    pkger: GluegunPkger;
-  }
-}
-
-export default (toolbox: GluegunToolbox) => {
   toolbox.pkger = {
     build: build,
   };

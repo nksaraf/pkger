@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { render } from 'ink';
-import { GluegunToolbox } from 'gluegun';
+import { Toolbox, GluegunToolbox } from 'gluegun';
 import { ToolboxProvider } from '../components/Toolbox';
 
 declare module 'gluegun' {
@@ -8,12 +8,12 @@ declare module 'gluegun' {
     render: typeof render;
   }
 
-  interface GluegunToolbox {
+  interface Toolbox extends GluegunToolbox {
     ink: GluegunInk;
   }
 }
 
-export default (toolbox: GluegunToolbox) => {
+export default (toolbox: Toolbox) => {
   toolbox.ink = {
     render: (children) => {
       return render(

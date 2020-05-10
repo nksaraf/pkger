@@ -19,7 +19,7 @@ import pluginOptionalChaining from '@babel/plugin-proposal-optional-chaining';
 import pluginTransformRegen from '@babel/plugin-transform-regenerator';
 // import pluginStyledComponents from 'babel-plugin-styled-components';
 import pluginMacros from 'babel-plugin-macros';
-import { GluegunToolbox } from 'gluegun';
+import { Toolbox, GluegunToolbox } from 'gluegun';
 
 let hasReact = (pkg: string) =>
   ['dependencies', 'devDependencies', 'peerDependencies'].reduce(
@@ -78,12 +78,12 @@ declare module 'gluegun' {
     createConfig: typeof babelConfig;
   }
 
-  interface GluegunToolbox {
+  interface Toolbox extends GluegunToolbox {
     babel: GluegunBabel;
   }
 }
 
-export default (toolbox: GluegunToolbox) => {
+export default (toolbox: Toolbox) => {
   toolbox.babel = {
     createConfig: babelConfig,
   };

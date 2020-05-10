@@ -1,4 +1,4 @@
-import { GluegunToolbox } from 'gluegun';
+import { Toolbox } from 'gluegun';
 
 import path from 'path';
 import defaults from 'lodash/defaults';
@@ -7,19 +7,17 @@ import { PackageJson, TsdxOptions } from '../types';
 import { RollupOptions } from 'rollup';
 import { paths, DEBUG } from '../utils';
 
-export async function createConfig(toolbox: GluegunToolbox) {
+export async function createConfig(toolbox: Toolbox) {
   const cwd = process.cwd();
-  const cliOpts = { ...toolbox.config };
-
-  const config = toolbox.config.loadConfig(process.cwd(), 'pkger');
   const packageJson = await loadPackageJson();
-
   const name = path.basename(cwd);
+
   const tsconfig = toolbox.path.oneExists(
     ['tsconfig.build.json', 'tsconfig.json'],
     undefined,
     cwd
   );
+
   const tsconfigContents = await fs.readJSON(
     path.join(cwd, tsconfig ?? 'tsconfig.build.json')
   );
@@ -28,14 +26,15 @@ export async function createConfig(toolbox: GluegunToolbox) {
 
   DEBUG && console.log('SOURCE', source);
   const rootOptions = defaults(
-    cliOpts,
+    toolbox.parameters.options,
     defaults(
-      config,
+      toolbox.config.loadConfig('pkger', cwd),
       defaults(packageJson, {
         name,
         source,
         root: true,
         target: 'browser',
+        silent: false,
         builder: 'rollup',
         // format: 'esm,cjs',
         tsconfig,
@@ -43,12 +42,21 @@ export async function createConfig(toolbox: GluegunToolbox) {
         rollup(config: RollupOptions, _options: TsdxOptions): RollupOptions {
           return config;
         },
+        preBuild(toolbox, config) {
+          return null;
+        },
+        postBuild(toolbox, config) {
+          return null;
+        },
+        onBuildError(toolbox, config) {
+          return null;
+        },
       })
     )
   );
 
-  const sourceDir = path.dirname(rootOptions.source);
-  const allEntries: string[] = [rootOptions];
+  const sourceDir = path.dirname(rootOptions.source as any);
+  const allEntries: string[] = [rootOptions as any];
   const entries: any[] = (rootOptions.entries || []).map(
     (option: string | any) => {
       const pkgName = typeof option === 'string' ? option : option.name;
@@ -102,7 +110,7 @@ async function loadPackageJson() {
 
 // add your CLI-specific functionality here, which will then be accessible
 // to your commands
-export default async (toolbox: GluegunToolbox) => {
+export default async (toolbox: Toolbox) => {
   // enable this if you want to read configuration in from
   // the current folder's package.json (in a "pkger" property),
   // pkger.config.json, etc.

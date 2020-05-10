@@ -21,7 +21,7 @@ export const [ProcessManager, useProcessManager] = createContext(
               },
             };
           }
-          case 'ADD':
+          case 'INIT':
           case 'RESET': {
             return {
               ...state,
@@ -37,7 +37,7 @@ export const [ProcessManager, useProcessManager] = createContext(
               ...state,
               [name]: {
                 ...state[name],
-                status: 'fail',
+                status: 'error',
                 ...ctx,
               },
             };
@@ -64,64 +64,39 @@ export const [ProcessManager, useProcessManager] = createContext(
     const processDispatch = (name: string) => (props) =>
       dispatch({ ...props, name });
 
-    // const fail = React.useCallback(
-    //   (name, props) => {
-    //     processDispatch(name)({ type: 'FAIL', ...props });
-    //   },
-    //   [dispatch]
-    // );
-    // const succeed = React.useCallback(
-    //   (name, props) => {
-    //     processDispatch(name)({ type: 'SUCCEED', ...props });
-    //   },
-    //   [dispatch]
-    // );
-    // const start = React.useCallback(
-    //   (name, props) => {
-    //     processDispatch(name)({ type: 'START', ...props });
-    //   },
-    //   [dispatch]
-    // );
+    const taskApi = (name) => {
+      return {
+        fail: (props = {}) => {
+          processDispatch(name)({ ...props, type: 'FAIL' });
+        },
+        init: (props = {}) => {
+          processDispatch(name)({ ...props, type: 'INIT' });
+        },
+        succeed: (props = {}) => {
+          processDispatch(name)({ ...props, type: 'SUCCEED' });
+        },
+        start: (props = {}) => {
+          processDispatch(name)({ ...props, type: 'START' });
+        },
+        reset: (props = {}) => {
+          processDispatch(name)({ ...props, type: 'RESET' });
+        },
+      };
+    };
+
     const add = React.useCallback(
       (name, addProps = {}) => {
-        processDispatch(name)({ ...addProps, type: 'ADD' });
-        return {
-          fail: (props = {}) => {
-            processDispatch(name)({ ...props, type: 'FAIL' });
-          },
-          succeed: (props = {}) => {
-            processDispatch(name)({ ...props, type: 'SUCCEED' });
-          },
-          start: (props = {}) => {
-            processDispatch(name)({ ...props, type: 'START' });
-          },
-          reset: (props = {}) => {
-            processDispatch(name)({ ...props, type: 'RESET' });
-          },
-        };
+        const api = taskApi(name);
+        api.init(addProps);
+        return api;
       },
       [dispatch]
     );
 
     const addTask = React.useCallback(
       (task, props = {}) => {
-        processDispatch(task.name)({ ...props, type: 'ADD', ...task });
-
-        const api = {
-          fail: (props = {}) => {
-            processDispatch(task.name)({ ...props, type: 'FAIL' });
-          },
-          succeed: (props = {}) => {
-            processDispatch(task.name)({ ...props, type: 'SUCCEED' });
-          },
-          start: (props = {}) => {
-            processDispatch(task.name)({ ...props, type: 'START' });
-          },
-          reset: (props = {}) => {
-            processDispatch(task.name)({ ...props, type: 'RESET' });
-          },
-        };
-
+        const api = taskApi(task.name);
+        api.init({ ...props, ...task });
         task.onSuccess = (result) => api.succeed({ result });
         task.onStart = api.start;
         task.onError = (error) => api.fail({ error });
@@ -130,7 +105,7 @@ export const [ProcessManager, useProcessManager] = createContext(
           task,
           ...api,
           runTask: async () => {
-            await runTask(task);
+            return await runTask(task);
           },
         };
       },
@@ -141,18 +116,7 @@ export const [ProcessManager, useProcessManager] = createContext(
       (name) => {
         if (ref.current[name]) {
           return {
-            fail: (props = {}) => {
-              processDispatch(name)({ ...props, type: 'FAIL' });
-            },
-            succeed: (props = {}) => {
-              processDispatch(name)({ ...props, type: 'SUCCEED' });
-            },
-            start: (props = {}) => {
-              processDispatch(name)({ ...props, type: 'START' });
-            },
-            reset: (props = {}) => {
-              processDispatch(name)({ ...props, type: 'RESET' });
-            },
+            ...taskApi(name),
             ...ref.current[name],
           };
         }
@@ -160,12 +124,6 @@ export const [ProcessManager, useProcessManager] = createContext(
       },
       [dispatch]
     );
-    // const reset = React.useCallback(
-    //   (name, props) => {
-    //     processDispatch(name)({ type: 'RESET', ...props });
-    //   },
-    //   [dispatch]
-    // );
 
     return {
       // processDispatch,
@@ -208,39 +166,37 @@ export const getCommand = (status, procType) => {
   );
 };
 
-export function Process({ process }) {
-  const pm = useProcessManager();
-  const thisProcess = pm.get(process);
-  if (!thisProcess) {
+export function Process({ id }) {
+  const manager = useProcessManager();
+  const process = manager.get(id);
+  if (!process) {
     return null;
   }
-  const t = thisProcess.taskType;
+  const t = process.taskType;
   return (
     <Box>
       <Box>
-        {thisProcess.status === 'running' && (
-          <Spinner type="dots" color="cyan" />
-        )}
-        {thisProcess.status === 'idle' && <Spinner color="dim" type="dots" />}
-        {thisProcess.status === 'success' && <Color green>✔ </Color>}
-        {thisProcess.status === 'error' && <Color red>✖ </Color>}
+        {process.status === 'running' && <Spinner type="dots" color="cyan" />}
+        {process.status === 'idle' && <Spinner color="dim" type="dots" />}
+        {process.status === 'success' && <Color green>✔ </Color>}
+        {process.status === 'error' && <Color red>✖ </Color>}
       </Box>
       <Box>
-        <Color {...{ [getColor(thisProcess.status, t)]: true }}>
+        <Color {...{ [getColor(process.status, t)]: true }}>
           <Box width="12">
-            {t[0]} {getCommand(thisProcess.status, t)}
+            {t[0]} {getCommand(process.status, t)}
           </Box>
-          {thisProcess.description ? (
+          {process.description ? (
             <>
-              {typeof thisProcess.description === 'string'
-                ? thisProcess.description
-                : thisProcess.description[thisProcess.status]}{' '}
+              {typeof process.description === 'string'
+                ? process.description
+                : process.description[process.status]}{' '}
             </>
           ) : (
             ''
           )}
-          {thisProcess.message}{' '}
-          {thisProcess.status === 'idle' || thisProcess.status === 'running' ? (
+          {process.message}{' '}
+          {process.status === 'idle' || process.status === 'running' ? (
             <Spinner type="simpleDotsScrolling" />
           ) : null}
         </Color>

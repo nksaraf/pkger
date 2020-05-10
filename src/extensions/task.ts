@@ -1,5 +1,5 @@
 import asyncro from 'asyncro';
-import { GluegunToolbox } from 'gluegun';
+import { Toolbox } from 'gluegun';
 
 export interface TaskEventHandlers {
   onError?: (error: any, task: Task) => void;
@@ -10,10 +10,11 @@ export interface TaskEventHandlers {
 export interface TaskConfig extends TaskEventHandlers, Record<string, any> {
   name?: string;
   taskType?: any;
+  description?: any;
 }
 
 export interface Task extends TaskConfig {
-  run: () => void | Promise<void> | Promise<string | undefined>;
+  run: () => void | Promise<void> | Promise<any>;
 }
 
 export const createTask = (
@@ -35,21 +36,25 @@ export async function runTask(
 ) {
   if (onStart) {
     onStart(task);
-  } else if (task.onStart) {
+  }
+  if (task.onStart) {
     task.onStart(task);
   }
 
   try {
     const result = (await task.run()) || undefined;
+
     if (onSuccess) {
       onSuccess(result, task);
-    } else if (task.onSuccess) {
+    }
+    if (task.onSuccess) {
       task.onSuccess(result, task);
     }
   } catch (error) {
     if (onError) {
       onError(error, task);
-    } else if (task.onError) {
+    }
+    if (task.onError) {
       task.onError(error, task);
     }
   }
@@ -62,7 +67,7 @@ export async function mapTasksParallel(
   return await asyncro
     .map(tasks, async (task: any) => {
       try {
-        await runTask(task, childHandlers);
+        return await runTask(task, childHandlers);
       } catch (error) {
         error.task = task;
         throw error;
@@ -91,7 +96,7 @@ export const PROCESS = {
   COMPILE: ['📦', 'compiling', 'compiled', 'cyan', 'green', 'red'],
   FIX: ['🔧', 'fixing', 'fixed', 'blue', 'green', 'red'],
   WRITE: ['📝', 'writing', 'wrote', 'blue', 'green', 'red'],
-  PKGER: ['👷', 'pkger', 'pkger', 'yellow', 'greenBright', 'bold'],
+  PKGER: ['👷', 'pkger', 'pkger', 'yellow', 'greenBright', 'red'],
 };
 
 declare module 'gluegun' {
@@ -103,12 +108,12 @@ declare module 'gluegun' {
     TYPES: typeof PROCESS;
   }
 
-  interface GluegunToolbox {
+  interface Toolbox {
     task: GluegunTask;
   }
 }
 
-export default (toolbox: GluegunToolbox) => {
+export default (toolbox: Toolbox) => {
   toolbox.task = {
     create: createTask,
     createParallel: createParallelTask,

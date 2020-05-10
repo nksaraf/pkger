@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { render } from 'ink';
 import { Color } from 'ink';
@@ -13,9 +12,7 @@ import { useToolbox } from '../components/Toolbox';
 export default {
   name: 'watch',
   run: async (toolbox) => {
-    const { print, render } = toolbox;
-
-    render(<ProcessManager>{/* <Watch /> */}</ProcessManager>);
+    toolbox.ink.render(<ProcessManager>{/* <Watch /> */}</ProcessManager>);
   },
 } as GluegunCommand;
 

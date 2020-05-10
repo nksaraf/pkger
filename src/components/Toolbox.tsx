@@ -1,9 +1,9 @@
 import { createContext } from 'create-hook-context';
-import { GluegunToolbox } from 'gluegun';
+import { Toolbox } from 'gluegun';
 
 export const [ToolboxProvider, useToolbox, withToolbox] = createContext<
-  GluegunToolbox,
-  { toolbox: GluegunToolbox }
+  Toolbox,
+  { toolbox: Toolbox }
 >(
   ({ toolbox }) => {
     return toolbox;
