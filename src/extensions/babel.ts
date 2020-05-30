@@ -20,16 +20,23 @@ import pluginTransformRegen from '@babel/plugin-transform-regenerator';
 // import pluginStyledComponents from 'babel-plugin-styled-components';
 import pluginMacros from 'babel-plugin-macros';
 import { Toolbox, GluegunToolbox } from 'gluegun';
+import { PackageOptions } from "../types";
 
-let hasReact = (pkg: string) =>
+let hasReact = (pkg: PackageOptions) =>
   ['dependencies', 'devDependencies', 'peerDependencies'].reduce(
     (last, current) => last || (pkg[current] && pkg[current]['react']),
     false
   );
 
-export const babelConfig = (options: any) => {
+export interface BabelOptions {
+  presets: any[];
+  plugins: any[];
+  extensions: string[];
+}
+
+export const babelConfig = (pkg: PackageOptions) => {
   const extensions = [...DEFAULT_EXTENSIONS, '.ts', '.tsx', '.json', '.node'];
-  const { browserlist, format, jsx } = options;
+  const { browserlist, format, jsx } = pkg;
 
   // Note: when using `React`, presetTs needs `React` as jsxPragma,
   // vs presetReact needs `React.createElement`,
@@ -37,7 +44,7 @@ export const babelConfig = (options: any) => {
   let [jsxPragma, pragma, pragmaFrag] =
     jsx !== 'react'
       ? [jsx, jsx, jsx]
-      : hasReact(options)
+      : hasReact(pkg)
       ? ['React', 'React.createElement', 'React.Fragment']
       : ['h', 'h', 'h'];
 
@@ -45,12 +52,12 @@ export const babelConfig = (options: any) => {
     [
       presetEnv,
       {
-        // bugfixes: true,
+        bugfixes: true,
         loose: true,
         useBuiltIns: false,
         modules: false,
         targets:
-          options.target === 'browser' ? { esmodules: true } : { node: '12' },
+          pkg.target === 'browser' ? { esmodules: false } : { node: '12' },
         exclude: ['transform-async-to-generator', 'transform-regenerator'],
       },
     ],
@@ -70,7 +77,7 @@ export const babelConfig = (options: any) => {
     [pluginMacros],
   ];
 
-  return { presets, plugins, extensions };
+  return pkg.babel({ presets, plugins, extensions }, pkg);
 };
 
 declare module 'gluegun' {

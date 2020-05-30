@@ -1,67 +1,66 @@
 import { GluegunToolbox } from 'gluegun';
-
-interface SharedOpts {
-  // JS target
-  target: 'node' | 'browser' | 'cli';
-  // Path to tsconfig file
+import { RollupOptions } from 'rollup';
+import { BabelOptions } from './extensions/babel';
+export type PackageFormat = 'esm' | 'umd' | 'cjs';
+export interface PackageOptions {
+  builder?: 'rollup' | 'tsc';
+  typecheck?: boolean;
   tsconfig?: string;
-  // Is error extraction running?
-  extractErrors?: boolean;
-}
-
-export type ModuleFormat = 'cjs' | 'umd' | 'esm' | 'system';
-
-export interface BuildOpts extends SharedOpts {
-  silent: any;
+  debug?: boolean;
+  dev?: boolean;
+  cmd?: string;
+  tsconfigContents?: {
+    [key: string]: any;
+  };
+  rollup?: (config: RollupOptions, pkg: PackageOptions) => RollupOptions;
+  babel?: (config: BabelOptions, pkg: PackageOptions) => BabelOptions;
+  preBuild?: (toolbox: Toolbox, pkg: PackageOptions) => void | Promise<void>;
+  postBuild?: (toolbox: Toolbox, pkg: PackageOptions) => void | Promise<void>;
+  onBuildError?: (toolbox: Toolbox, pkg: PackageOptions) => void;
   name?: string;
-  entry?: string | string[];
-  format: string;
-  target: 'browser';
-}
-
-export interface WatchOpts extends BuildOpts {
-  verbose?: boolean;
-  noClean?: boolean;
-  // callback hooks
-  onFirstSuccess?: string;
-  onSuccess?: string;
-  onFailure?: string;
-}
-
-export interface NormalizedOpts
-  extends Omit<WatchOpts, 'name' | 'input' | 'format'> {
-  name: string;
-  input: string[];
-  format: [ModuleFormat, ...ModuleFormat[]];
-}
-
-export interface TsdxOptions extends SharedOpts {
-  [x: string]: any;
-  // Name of package
-  name: string;
-  // path to file
-  input: string;
-  // Environment
-  env: 'development' | 'production';
-  // Module format
-  format: ModuleFormat;
-  // Is minifying?
-  minify?: boolean;
-  // Is this the very first rollup config (and thus should one-off metadata be extracted)?
-  writeMeta?: boolean;
-  // Only transpile, do not type check (makes compilation faster)
-  transpileOnly?: boolean;
-}
-
-export interface PackageJson {
-  name: string;
+  external?: (
+    pkg: PackageOptions,
+    imported: string,
+    importer: string,
+    resolved: boolean
+  ) => boolean;
+  browserlist?: string;
   source?: string;
+  input?: string;
+  label?: string;
+  env?: 'development' | 'production';
+  jsx?: 'react' | 'h' | 'React.createElement';
+  root?: boolean;
+  target?: 'node' | 'browser' | 'cli';
+  format?: PackageFormat[];
+  silent?: boolean;
+  minify?: boolean;
+  tasks?: {
+    [key: string]: (
+      toolbox: Toolbox,
+      pkg: PackageOptions
+    ) => void | Promise<void>;
+  };
   jest?: any;
   eslint?: any;
-  dependencies?: { [packageName: string]: string };
-  devDependencies?: { [packageName: string]: string };
+  dependencies?: {
+    [packageName: string]: string;
+  };
+  devDependencies?: {
+    [packageName: string]: string;
+  };
   engines?: {
     node?: string;
+  };
+  outputFile?: string;
+  outputFormat?: PackageFormat;
+  entryName?: string;
+  allPackages?: PackageOptions[];
+  allEntries?: PackageOptions[];
+  entries?: (string | PackageOptions)[];
+  packages?: PackageOptions[];
+  exports?: {
+    [key: string]: boolean | PackageOptions;
   };
 }
 

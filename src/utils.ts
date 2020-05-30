@@ -2,12 +2,11 @@ import * as fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 import camelCase from 'camelcase';
-// import progressEstimator from 'progress-estimator';
-
-import { PackageJson } from './types';
 import execa from 'execa';
+import { list } from './extensions/task';
+import { PackageOptions } from "./types";
 
-export let DEBUG = false;
+export let DEBUG = process.argv.includes('--dev');
 
 // Remove the package name scope if it exists
 export const removeScope = (name: string) => name.replace(/^@.*\//, '');
@@ -62,7 +61,7 @@ export function clearConsole() {
 export function getReactVersion({
   dependencies,
   devDependencies,
-}: PackageJson) {
+}: PackageOptions) {
   return (
     (dependencies && dependencies.react) ||
     (devDependencies && devDependencies.react)
@@ -130,19 +129,13 @@ export async function cleanDistFolder() {
   await fs.remove(paths.appDist);
 }
 
-export function getOutputPath(options: any) {
+export function getOutputPath(options: PackageOptions) {
   return path.join(
-    ...[
+    ...list([
       paths.appDist,
-      options.format,
+      options.outputFormat,
       options.env,
-      [
-        // @ts-ignore
-        options.entryName ?? options.name,
-        'js',
-      ]
-        .filter(Boolean)
-        .join('.'),
-    ].filter(Boolean)
+      list([options.entryName ?? options.name, 'js']).join('.'),
+    ])
   );
 }

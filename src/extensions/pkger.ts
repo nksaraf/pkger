@@ -7,11 +7,11 @@ import {
 } from '../utils';
 import fs from 'fs-extra';
 import { getRelativePath } from './path';
-import { createTask, PROCESS, createParallelTask } from './task';
+import { createTask, PROCESS, createParallelTask, Task, list } from './task';
 import path, { PlatformPath } from 'path';
 import { getRollupConfigs, createRollupTask } from './rollup';
-import { flatten } from 'lodash';
 import { Toolbox, GluegunToolbox } from 'gluegun';
+import { PackageOptions } from "../types";
 
 export function cjsEntryFile(name: string) {
   const baseLine = `module.exports = require('./`;
@@ -26,11 +26,11 @@ if (process.env.NODE_ENV === 'production') {
 `;
 }
 
-function addBin(pkg: { cmd: any; name: string }) {
-  return (pkgJson: { [x: string]: any }) => {
+function addBin(pkg: PackageOptions) {
+  return (pkgJson: PackageOptions & any) => {
     const outputPath = getOutputPath({
       ...pkg,
-      format: 'cjs',
+      outputFormat: 'cjs',
     });
     return {
       ...pkgJson,
@@ -71,15 +71,23 @@ function transformPackageJsonTask(options, transforms: any[] = []) {
             ...p,
             module: getRelativePath(
               process.cwd(),
-              getOutputPath({ ...root, format: 'esm' })
+              getOutputPath({ ...root, outputFormat: 'esm' })
             ),
           })),
-        root.target === 'browser' &&
+        root.format.includes('umd') &&
           ((p: any) => ({
             ...p,
             browser: getRelativePath(
               process.cwd(),
-              getOutputPath({ ...root, format: 'esm' })
+              getOutputPath({ ...root, outputFormat: 'umd' })
+            ),
+          })),
+        root.target.includes('browser') &&
+          ((p: any) => ({
+            ...p,
+            browser: getRelativePath(
+              process.cwd(),
+              getOutputPath({ ...root, outputFormat: 'esm' })
             ),
           })),
         root.format.includes('cjs') &&
@@ -87,14 +95,13 @@ function transformPackageJsonTask(options, transforms: any[] = []) {
             ...p,
             main: getRelativePath(
               process.cwd(),
-              getOutputPath({ ...root, format: 'cjs' })
+              getOutputPath({ ...root, outputFormat: 'cjs' })
             ),
           })),
         (p: any) => ({
           ...p,
           types:
             options.tsconfigContents.compilerOptions['declarationDir'] ||
-            'dist/types' ||
             'dist/types',
         }),
         // add bin for 'cli'
@@ -128,21 +135,30 @@ function transformPackageJsonTask(options, transforms: any[] = []) {
   });
 }
 
-export function nonRollupTasks(pkg) {
-  const { format } = pkg;
+type TaskPlugin = (
+  pkg: PackageOptions
+) => Promise<Task[] | Task | void> | Task[] | Task | void;
+
+const cjsEntryTask: TaskPlugin = (pkg) => {
+  if (pkg.format.includes('cjs')) {
   return [
-    format.includes('cjs') &&
       createTask(
         str(pkg.name, 'cjs', 'entry'),
         { taskType: PROCESS.WRITE },
         async () => {
-          const outputPath = getOutputPath({ ...pkg, format: 'cjs' });
+          const outputPath = getOutputPath({ ...pkg, outputFormat: 'cjs' });
           await fs.outputFile(
             outputPath,
             cjsEntryFile(pkg.entryName || pkg.name)
           );
         }
       ),
+    ];
+  }
+};
+
+const subPackageFolderTask: TaskPlugin = (pkg) => {
+  return (
     !pkg.root &&
       pkg.target !== 'cli' &&
       createTask(
@@ -157,7 +173,7 @@ export function nonRollupTasks(pkg) {
               ? {
                   main: getRelativePath(
                     path.join(process.cwd(), pkg.entryName),
-                    getOutputPath({ ...pkg, format: 'cjs' })
+                  getOutputPath({ ...pkg, outputFormat: 'cjs' })
                   ),
                 }
               : {}),
@@ -165,7 +181,7 @@ export function nonRollupTasks(pkg) {
               ? {
                   module: getRelativePath(
                     path.join(process.cwd(), pkg.entryName),
-                    getOutputPath({ ...pkg, format: 'esm' })
+                  getOutputPath({ ...pkg, outputFormat: 'esm' })
                   ),
                 }
               : {}),
@@ -179,20 +195,23 @@ export function nonRollupTasks(pkg) {
             JSON.stringify(packageJson, null, 2)
           );
         }
-      ),
-  ].filter(Boolean);
-}
+    )
+  );
+};
 
-export function packageTasks(pkg: any) {
-  return createParallelTask(
+export function buildPackageTask(pkg: PackageOptions) {
+  const tasks = createParallelTask(
     pkg.name,
     [
-      ...getRollupConfigs(pkg).map(createRollupTask),
-      ...nonRollupTasks(pkg),
-    ].filter(Boolean),
+      getRollupConfigs(pkg).map(createRollupTask),
+      cjsEntryTask(pkg),
+      subPackageFolderTask(pkg),
+    ],
     { taskType: PROCESS.COMPILE }
   );
+  return tasks;
 }
+
 declare module 'gluegun' {
   interface GluegunPkger {
     build: (options: any) => Promise<any[]>;
@@ -203,9 +222,9 @@ declare module 'gluegun' {
   }
 }
 
-export function typescriptTask(options: any) {
+export function typescriptTask(pkg: PackageOptions) {
   return createTask('typescript', { taskType: PROCESS.EMIT }, async () => {
-    await runCommand(`tsc -p ${options.tsconfig}`);
+    await runCommand(`tsc -p ${pkg.tsconfig}`);
   });
 }
 

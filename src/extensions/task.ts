@@ -1,5 +1,6 @@
 import asyncro from 'asyncro';
 import { Toolbox } from 'gluegun';
+import { flatten } from 'lodash';
 
 export interface TaskEventHandlers {
   onError?: (error: any, task: Task) => void;
@@ -10,7 +11,7 @@ export interface TaskEventHandlers {
 export interface TaskConfig extends TaskEventHandlers, Record<string, any> {
   name?: string;
   taskType?: any;
-  description?: any;
+  description?: string | { [key: string]: string };
 }
 
 export interface Task extends TaskConfig {
@@ -53,9 +54,10 @@ export async function runTask(
   } catch (error) {
     if (onError) {
       onError(error, task);
-    }
-    if (task.onError) {
+    } else if (task.onError) {
       task.onError(error, task);
+    } else {
+      throw error;
     }
   }
 }
@@ -78,7 +80,7 @@ export async function mapTasksParallel(
     });
 }
 
-export async function createParallelTask(
+export function createParallelTask(
   name: string,
   tasks: any[],
   handlers: TaskConfig = {},
@@ -87,7 +89,7 @@ export async function createParallelTask(
   return createTask(
     name,
     handlers,
-    async () => await mapTasksParallel(tasks, childHandlers)
+    async () => await mapTasksParallel(list(tasks), childHandlers)
   );
 }
 
@@ -122,3 +124,7 @@ export default (toolbox: Toolbox) => {
     TYPES: PROCESS,
   };
 };
+
+export function list<T>(...tasks: (T | T[])[]): T[] {
+  return flatten(Array.isArray(tasks) ? tasks : [tasks]).filter(Boolean);
+}

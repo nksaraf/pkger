@@ -1,13 +1,66 @@
-import { Toolbox } from 'gluegun';
+import { Toolbox, GluegunToolbox } from 'gluegun';
 
 import path from 'path';
 import defaults from 'lodash/defaults';
 import * as fs from 'fs-extra';
-import { PackageJson, TsdxOptions } from '../types';
-import { RollupOptions } from 'rollup';
 import { paths, DEBUG } from '../utils';
+import { defaultLoaders, cosmiconfigSync } from 'cosmiconfig';
+import { PackageOptions, PackageFormat } from '../types';
 
-export async function createConfig(toolbox: Toolbox) {
+// import { AsyncLoader } from 'cosmiconfig';
+// import get from 'lodash.get';
+
+// import TypeScriptCompileError from './Errors/TypeScriptCompileError';
+
+const loader = (tsconfig: string) => (filePath: string) => {
+  try {
+    require('ts-node').register({
+      project: process.cwd() + `/${tsconfig}`,
+      extensions: '.ts',
+    });
+
+    const result = require(filePath);
+    return result?.default ?? result;
+
+    // return get(result, 'default', result);
+  } catch (error) {
+    // Replace with logger class OR throw a more specific error
+    // throw TypeScriptCompileError.fromError(error);
+    throw error;
+  }
+};
+
+export function loadConfig(
+  moduleName: string,
+  src: string,
+  tsconfig: string
+): PackageOptions {
+  const cosmic = cosmiconfigSync(moduleName || '', {
+    loaders: {
+      ...defaultLoaders,
+      '.ts': loader(tsconfig),
+    },
+    searchPlaces: [
+      'package.json',
+      // `.${moduleName}rc`,
+      // `.${moduleName}rc.json`,
+      // `.${moduleName}rc.yaml`,
+      // `.${moduleName}rc.yml`,
+      // `.${moduleName}rc.js`,
+      `${moduleName}.config.js`,
+      `${moduleName}.config.ts`,
+    ],
+  }).search(src || '');
+
+  // use what we found or fallback to an empty object
+  const config = (cosmic && cosmic.config) || {};
+  DEBUG && console.log('[debug] config: ', config);
+  return config;
+}
+
+const noop = function (...args: any[]) {};
+
+export async function createConfig(toolbox: Toolbox): Promise<PackageOptions> {
   const cwd = process.cwd();
   const packageJson = await loadPackageJson();
   const name = path.basename(cwd);
@@ -24,11 +77,10 @@ export async function createConfig(toolbox: Toolbox) {
   let source = toolbox.path.resolveEntry(cwd);
   source = source ? './' + toolbox.path.from(cwd, source) : undefined;
 
-  DEBUG && console.log('SOURCE', source);
-  const rootOptions = defaults(
-    toolbox.parameters.options,
+  const rootOptions: PackageOptions = defaults<PackageOptions, PackageOptions>(
+    toolbox.parameters.options as any,
     defaults(
-      toolbox.config.loadConfig('pkger', cwd),
+      loadConfig('pkger', cwd, tsconfig),
       defaults(packageJson, {
         name,
         source,
@@ -36,76 +88,99 @@ export async function createConfig(toolbox: Toolbox) {
         target: 'browser',
         silent: false,
         builder: 'rollup',
-        // format: 'esm,cjs',
+        tasks: {},
         tsconfig,
+        debug: DEBUG,
         tsconfigContents,
-        rollup(config: RollupOptions, _options: TsdxOptions): RollupOptions {
+        rollup(config) {
           return config;
         },
-        preBuild(toolbox, config) {
-          return null;
+        external() {
+          return true;
         },
-        postBuild(toolbox, config) {
-          return null;
+        babel(config) {
+          return config;
         },
-        onBuildError(toolbox, config) {
-          return null;
-        },
-      })
+        preBuild: noop,
+        postBuild: noop,
+        onBuildError: noop,
+      } as PackageOptions)
     )
   );
 
   const sourceDir = path.dirname(rootOptions.source as any);
-  const allEntries: string[] = [rootOptions as any];
-  const entries: any[] = (rootOptions.entries || []).map(
-    (option: string | any) => {
-      const pkgName = typeof option === 'string' ? option : option.name;
-      let name = rootOptions.name + '/' + pkgName;
-      let source = toolbox.path.resolveEntry(
-        toolbox.path.join(sourceDir, pkgName)
-      );
-      source = source
-        ? './' + toolbox.path.from(cwd, source)
-        : typeof option === 'object'
-        ? option.source
-        : undefined;
+  const allPackages: PackageOptions[] = [rootOptions];
+  const packages: PackageOptions[] = (rootOptions.entries || []).map((pkg) => {
+    const pkgName = typeof pkg === 'string' ? pkg : pkg.name;
+    let name = rootOptions.name + '/' + pkgName;
+    let source = toolbox.path.resolveEntry(
+      toolbox.path.join(sourceDir, pkgName)
+    );
+    source = source
+      ? './' + toolbox.path.from(cwd, source)
+      : typeof pkg === 'object'
+      ? pkg.source
+      : undefined;
 
-      let baseEntryOption =
-        typeof option === 'string'
-          ? { name, source, entryName: pkgName }
-          : { ...option, name, source, entryName: pkgName };
-      const entryOption = defaults(baseEntryOption, rootOptions);
-      allEntries.push(entryOption);
-      return entryOption;
+    let basePkg: PackageOptions =
+      typeof pkg === 'string'
+        ? { name, source, entryName: pkgName }
+        : { ...pkg, name, source, entryName: pkgName };
+
+    let fullPkg = defaults(basePkg, rootOptions);
+
+    if (!fullPkg.rollup) {
+      fullPkg.rollup = rootOptions.rollup;
     }
-  );
 
-  rootOptions.entries = entries
-    .map((entry) => ({ ...entry, root: false, allEntries }))
-    .map(resolveDependentOptions);
-  rootOptions.allEntries = allEntries;
-  return resolveDependentOptions(rootOptions);
+    fullPkg.root = false;
+    fullPkg.allPackages = allPackages;
+    fullPkg.allEntries = allPackages;
+    fullPkg = resolveFormatFromTarget(fullPkg);
+    allPackages.push(fullPkg);
+    return fullPkg;
+  });
+
+  rootOptions.entries = packages;
+  rootOptions.allEntries = allPackages;
+  rootOptions.allPackages = allPackages;
+  return resolveFormatFromTarget(rootOptions);
 }
 
-const FORMATS: any = {
-  browser: 'cjs,esm',
-  node: 'cjs',
-  cli: '',
+const FORMATS: {
+  [key in PackageOptions['target']]: PackageFormat[];
+} = {
+  browser: ['cjs', 'esm'],
+  node: ['cjs', 'esm'],
+  cli: [],
 };
 
-function resolveDependentOptions(pkg: any) {
-  const { target, format = target ? FORMATS[target] : 'esm' } = pkg;
-  return { ...pkg, target, format };
+function resolveFormatFromTarget(pkg: PackageOptions): PackageOptions {
+  const { target = 'browser', format = FORMATS[target] } = pkg;
+  return {
+    ...pkg,
+    target,
+    format: (typeof format === 'string'
+      ? (format as any).split(',').map((f) => f.trim())
+      : format
+    ).filter((f: string) => f.length > 0) as PackageFormat[],
+  };
 }
 
 async function loadPackageJson() {
-  let packageJson: PackageJson = {} as any;
+  let packageJson: PackageOptions = {} as any;
 
   try {
     packageJson = await fs.readJSON(paths.packageJson);
   } catch (e) {}
 
   return packageJson;
+}
+
+declare module 'gluegun' {
+  interface Toolbox extends GluegunToolbox {
+    config: PackageOptions;
+  }
 }
 
 // add your CLI-specific functionality here, which will then be accessible

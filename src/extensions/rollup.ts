@@ -16,35 +16,34 @@ import path from 'path';
 
 // import { extractErrors } from '../archive/errors/extractErrors';
 // import { babelPluginTsdx } from './babel';
-import { TsdxOptions } from '../types';
 import { babelConfig } from './babel';
 
 import { Plugin } from 'rollup';
 import MagicString from 'magic-string';
 import { getOutputPath } from '../utils';
 
-export function getRollupConfigs(pkg: any) {
-  const { target, format, source, name, label = str(name, format) } = pkg;
+export function getRollupConfigs(pkg: PackageOptions) {
+  const { target, format, source, name, label = `${name} ${format}` } = pkg;
 
   return [
     format.includes('esm') &&
       getRollupConfig({
         ...pkg,
-        format: 'esm',
+        outputFormat: 'esm',
         input: source,
         label: str(name, 'esm'),
       }),
     target === 'cli' &&
       getRollupConfig({
         ...pkg,
-        format: 'cjs',
+        outputFormat: 'cjs',
         input: source,
         label: str(name, 'cli'),
       }),
     format.includes('cjs') &&
       getRollupConfig({
         ...pkg,
-        format: 'cjs',
+        outputFormat: 'cjs',
         env: 'production',
         input: source,
         label: str(name, 'cjs', 'prod'),
@@ -52,10 +51,18 @@ export function getRollupConfigs(pkg: any) {
     format.includes('cjs') &&
       getRollupConfig({
         ...pkg,
-        format: 'cjs',
+        outputFormat: 'cjs',
         env: 'development',
         input: source,
         label: str(name, 'cjs', 'dev'),
+      }),
+    format.includes('umd') &&
+      getRollupConfig({
+        ...pkg,
+        outputFormat: 'umd',
+        // env: 'development',
+        input: source,
+        label: str(name, 'umd'),
       }),
   ].filter(Boolean);
 }
@@ -72,7 +79,7 @@ function getRollupConfig(options: TsdxOptions) {
   const config = createRollupConfig(options);
   // @ts-ignore
   const rollupConfig = options.rollup(config, options);
-  rollupConfig.label = options.label;
+  (rollupConfig as any).label = options.label;
   return rollupConfig;
 }
 
@@ -168,24 +175,24 @@ export function createRollupConfig(
     // Establish Rollup output
     output: {
       // Set filenames of the consumer's package
-      file: opts.outputFile,
+      file: pkg.outputFile,
       // Pass through the file format
-      format: opts.format,
+      format: pkg.outputFormat,
       // Do not let Rollup call Object.freeze() on namespace import objects
       // (i.e. import * as namespaceImportObject from...) that are accessed dynamically.
       freeze: false,
       // Respect tsconfig esModuleInterop when setting __esModule.
       esModule: Boolean(
-        opts.tsconfigContents.compilerOptions['esModuleInterop']
+        pkg.tsconfigContents.compilerOptions['esModuleInterop']
       ),
-      name: opts.name || safeVariableName(opts.name),
+      name: pkg.name || safeVariableName(pkg.name),
       sourcemap: true,
       globals: { react: 'React', 'react-native': 'ReactNative' },
       exports: 'named',
     },
     plugins: [
       alias({
-        entries: opts.allEntries.map((e) => ({
+        entries: pkg.allPackages.map((e) => ({
           find: `@${e.entryName ?? e.name}`,
           replacement: `./${e.entryName ?? e.name}`,
         })),
@@ -194,12 +201,12 @@ export function createRollupConfig(
         mainFields: [
           'module',
           'main',
-          opts.target === 'browser' ? 'browser' : undefined,
+          pkg.target === 'browser' ? 'browser' : undefined,
         ].filter(Boolean) as string[],
         // defaults + .jsx
         extensions: extensions,
       }),
-      opts.format === 'umd' &&
+      pkg.format.includes('umd') &&
         commonjs({
           // use a regex to make sure to include eventual hoisted packages
           include: /\/node_modules\//,
@@ -217,15 +224,15 @@ export function createRollupConfig(
         sourceMap: true,
         inputSourceMap: true,
       }),
-      opts.env !== undefined &&
+      pkg.env !== undefined &&
         replace({
-          'process.env.NODE_ENV': JSON.stringify(opts.env),
+          'process.env.NODE_ENV': JSON.stringify(pkg.env),
         }),
       // sourceMaps(),
       // sizeSnapshot({
       //   printInfo: false,
       // }),
-      opts.minify &&
+      pkg.minify &&
         terser({
           sourcemap: true,
           output: { comments: false },
@@ -235,14 +242,16 @@ export function createRollupConfig(
             passes: 10,
           },
           ecma: 5,
-          toplevel: opts.format === 'cjs',
+          toplevel: pkg.outputFormat === 'cjs',
           warnings: true,
         }),
       // sizeme(),
-      opts.target === 'cli' &&
+      pkg.target === 'cli' &&
         preserveShebangs({ shebang: '#!/usr/bin/env node' }),
     ].filter(Boolean),
   };
+
+  return config;
 }
 
 const SHEBANG_RX = /^#!.*/;
