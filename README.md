@@ -14,6 +14,7 @@ Standing on the shoulders of **giants**:
 
 - Build packages for the browser, node and the cli
 - Rollup powered build system (can be extended infinitely)
+- Seperate cjs builds for production and development
 - Super easy api for multiple entry points
 - Interprets and manages `package.json` (`module`, `exports`, `bin`, `files`, ...)
 - Automatically creates entry points for sub-entries
