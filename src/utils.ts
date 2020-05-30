@@ -4,9 +4,10 @@ import chalk from 'chalk';
 import camelCase from 'camelcase';
 import execa from 'execa';
 import { list } from './extensions/task';
-import { PackageOptions } from "./types";
+import { PackageOptions } from './types';
 
-export let DEBUG = process.argv.includes('--dev');
+export let DEBUG =
+  process.argv.includes('--dev') || process.argv.includes('--debug');
 
 // Remove the package name scope if it exists
 export const removeScope = (name: string) => name.replace(/^@.*\//, '');

@@ -1,6 +1,7 @@
 import asyncro from 'asyncro';
 import { Toolbox } from 'gluegun';
 import { flatten } from 'lodash';
+import { DEBUG } from 'src/utils';
 
 export interface TaskEventHandlers {
   onError?: (error: any, task: Task) => void;
@@ -52,6 +53,7 @@ export async function runTask(
       task.onSuccess(result, task);
     }
   } catch (error) {
+    DEBUG && console.error(error);
     if (onError) {
       onError(error, task);
     } else if (task.onError) {

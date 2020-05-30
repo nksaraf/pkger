@@ -7,6 +7,7 @@
       "es2015.promise",
       "es2015.generator",
       "es2015.iterable",
+      "ES2019.Object",
       "dom"
     ],
     "module": "commonjs",
@@ -20,6 +21,8 @@
     "sourceMap": false,
     "inlineSourceMap": true,
     "outDir": "dist/cli",
+    "baseUrl": "./",
+    "rootDir": "./",
     "esModuleInterop": true,
     "jsx": "react",
     "strict": false,

@@ -53,8 +53,8 @@ function ensureInFiles(entryName: string) {
   };
 }
 
-function transformPackageJsonTask(options, transforms: any[] = []) {
-  const { entries, ...root } = options;
+function transformPackageJsonTask(pkg: PackageOptions, transforms: any[] = []) {
+  const { packages, ...root } = pkg;
   const transform = (pkgJson: any) => {
     for (var t of [
       ...[
@@ -96,22 +96,35 @@ function transformPackageJsonTask(options, transforms: any[] = []) {
         (p: any) => ({
           ...p,
           types:
-            options.tsconfigContents.compilerOptions['declarationDir'] ||
+            pkg.tsconfigContents.compilerOptions['declarationDir'] ||
             'dist/types',
         }),
+        (p) => ({
+          ...p,
+          exports: {
+            '.': exportMapForPackage(root),
+            ...Object.fromEntries(
+              packages.map((pkg) => [
+                './' + pkg.entryName,
+                exportMapForPackage(root),
+              ])
+            ),
+            './package.json': './package.json',
+            './': './',
+          },
+        }),
         // add bin for 'cli'
-        ...[entries, root]
-          .filter((entry) => entry.target === 'cli')
-          .map((pkg) => addBin(pkg)),
-        ...entries
-          .filter((entry: { target: string }) => entry.target !== 'cli')
+        // ...[entries, root]
+        //   .filter((entry) => entry.target === 'cli')
+        //   .map((pkg) => addBin(pkg)),
+        ...packages
+          .filter((entry) => entry.target !== 'cli')
           .map((pkg: { cmd: any; entryName: string }) =>
             ensureInFiles(pkg.entryName)
           ),
         ensureInFiles('dist'),
         ensureInFiles(
-          options.tsconfigContents.compilerOptions['declarationDir'] ||
-            'dist/types'
+          pkg.tsconfigContents.compilerOptions['declarationDir'] || 'dist/types'
         ),
       ].filter(Boolean),
       ...transforms,
@@ -225,3 +238,28 @@ export default (toolbox: Toolbox) => {
     );
   };
 };
+
+function exportMapForPackage(pkg: PackageOptions) {
+  return {
+    import: getRelativePath(
+      process.cwd(),
+      getOutputPath({ ...pkg, outputFormat: 'esm' })
+    ),
+    browser: getRelativePath(
+      process.cwd(),
+      getOutputPath({ ...pkg, outputFormat: 'esm' })
+    ),
+    require: getRelativePath(
+      process.cwd(),
+      getOutputPath({ ...pkg, outputFormat: 'cjs' })
+    ),
+    node: getRelativePath(
+      process.cwd(),
+      getOutputPath({ ...pkg, outputFormat: 'cjs' })
+    ),
+    default: getRelativePath(
+      process.cwd(),
+      getOutputPath({ ...pkg, outputFormat: 'esm' })
+    ),
+  };
+}

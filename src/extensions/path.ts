@@ -22,6 +22,9 @@ export function getRelativePath(source: string, target: string) {
   }
   var relPathArr = targetArr.slice(sourceArr.length);
   relPathArr.length && (relativePath += relPathArr.join(sep) + sep);
+  relativePath = !relativePath.startsWith('.')
+    ? './' + relativePath
+    : relativePath;
   return relativePath + filename;
 }
 

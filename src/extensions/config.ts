@@ -17,6 +17,7 @@ const loader = (tsconfig: string) => (filePath: string) => {
     require('ts-node').register({
       project: process.cwd() + `/${tsconfig}`,
       extensions: '.ts',
+      transpileOnly: true,
     });
 
     const result = require(filePath);
