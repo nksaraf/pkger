@@ -16,10 +16,11 @@ Standing on the shoulders of **giants**:
 - Rollup powered build system (can be extended infinitely)
 - Super easy api for multiple entry points
 - Interprets and manages `package.json` (`module`, `exports`, `bin`, `files`, ...)
-- Automatically creates entry points for sub-entries and configues `exports` map property for latest node support
+- Automatically creates entry points for sub-entries
+- configues `exports` map property for latest node and [pika cdn](https://www.pika.dev/cdnn) support
 - Use internal aliases like `@components`, `@themes` for entry points to code-split (including dynamic imports)
 - Zero-config support for typescript, React and latest ES syntax (powered by Babel)
-- Scaffold command line apps
+- Scaffold command line apps with dev and prod modes
 - Custom config with a `pkger.config.ts` file or `pkger` entry in `package.json`:
   - Hook into build system (`preBuild`, `postBuild`) and do anything with a gluegun-powered toolbox
   - Add custom tasks that can be run with `pkger run <cmd>` (allowing to write mini node tasks for your projects)
