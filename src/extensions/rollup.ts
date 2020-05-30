@@ -90,7 +90,7 @@ function transformPackageJsonTask(pkg: PackageOptions, transforms: any[] = []) {
             ...p,
             main: getRelativePath(
               process.cwd(),
-              getOutputPath({ ...root, outputFormat: 'cjs' })
+              getOutputPath({ ...root, outputFormat: 'cjs', env: 'production' })
             ),
           })),
         (p: any) => ({
@@ -106,7 +106,7 @@ function transformPackageJsonTask(pkg: PackageOptions, transforms: any[] = []) {
             ...Object.fromEntries(
               packages.map((pkg) => [
                 './' + pkg.entryName,
-                exportMapForPackage(root),
+                exportMapForPackage(pkg),
               ])
             ),
             './package.json': './package.json',
@@ -251,11 +251,11 @@ function exportMapForPackage(pkg: PackageOptions) {
     ),
     require: getRelativePath(
       process.cwd(),
-      getOutputPath({ ...pkg, outputFormat: 'cjs' })
+      getOutputPath({ ...pkg, outputFormat: 'cjs', env: 'production' })
     ),
     node: getRelativePath(
       process.cwd(),
-      getOutputPath({ ...pkg, outputFormat: 'cjs' })
+      getOutputPath({ ...pkg, outputFormat: 'cjs', env: 'production' })
     ),
     default: getRelativePath(
       process.cwd(),

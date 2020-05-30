@@ -1,7 +1,7 @@
 import asyncro from 'asyncro';
 import { Toolbox } from 'gluegun';
 import { flatten } from 'lodash';
-import { DEBUG } from 'src/utils';
+import { DEBUG } from '../utils';
 
 export interface TaskEventHandlers {
   onError?: (error: any, task: Task) => void;

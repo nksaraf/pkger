@@ -21,8 +21,6 @@
     "sourceMap": false,
     "inlineSourceMap": true,
     "outDir": "dist/cli",
-    "baseUrl": "./",
-    "rootDir": "./",
     "esModuleInterop": true,
     "jsx": "react",
     "strict": false,
