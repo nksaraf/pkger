@@ -22,4 +22,5 @@ Standing on the shoulders of **giants**:
 - Custom config with a `pkger.config.ts` file or `pkger` entry in `package.json`:
   - Hook into build system (`preBuild`, `postBuild`) and do anything with a gluegun-powered toolbox
   - Add custom tasks that can be run with `pkger run <cmd>` (allowing to write mini node tasks for your projects)
+  - Write typescript with modern syntax in the config file too
 - Range of templates to get started working on your ideas
