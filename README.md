@@ -16,7 +16,7 @@ Standing on the shoulders of **giants**:
 - Rollup powered build system (can be extended infinitely)
 - Super easy api for multiple entry points
 - Interprets and manages `package.json` (`module`, `exports`, `bin`, `files`, ...)
-- Automatically creates entry points for sub-entries
+- Automatically creates entry points for sub-entries and configues `exports` map property for latest node support
 - Use internal aliases like `@components`, `@themes` for entry points to code-split (including dynamic imports)
 - Zero-config support for typescript, React and latest ES syntax (powered by Babel)
 - Scaffold command line apps
