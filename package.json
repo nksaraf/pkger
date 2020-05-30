@@ -20,11 +20,6 @@
   "bin": {
     "pkger": "bin/pkger"
   },
-  "pkger": {
-    "builder": "tsc",
-    "target": "cli",
-    "source": "./src/cli.ts"
-  },
   "scripts": {
     "prepare": "pkger build",
     "build": "pkger build",
@@ -62,6 +57,7 @@
     "camelcase": "^6.0.0",
     "chalk": "^4.0.0",
     "cli-spinners": "^2.3.0",
+    "comlink": "^4.3.0",
     "cosmiconfig": "^6.0.0",
     "create-hook-context": "^1.0.0",
     "enquirer": "^2.3.5",

@@ -7,10 +7,9 @@ var prodBuild = !(process.argv.indexOf('--dev') >= 0);
 
 if (prodBuild || !devMode) {
   // this runs from the compiled javascript source
-  var cli = require(`${__dirname}/../dist/cli`);
-  cli.run(process.argv);
+  var cli = require(`${__dirname}/../dist/cli/cli`);
+  cli.run(process.argv, false);
 } else {
-  console.log('pkger dev');
   // this runs from the typescript source (for dev only)
   // hook into ts-node so we can run typescript on the fly
   require('ts-node').register({
@@ -18,5 +17,5 @@ if (prodBuild || !devMode) {
     project: `${__dirname}/../tsconfig.json`,
   });
   // run the CLI with the current process arguments
-  require(`${__dirname}/../src/cli`).run(process.argv);
+  require(`${__dirname}/../src/cli`).run(process.argv, true);
 }

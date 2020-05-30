@@ -5,7 +5,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import replace from '@rollup/plugin-replace';
 import nodeResolve from '@rollup/plugin-node-resolve';
-import resolve from 'resolve';
 import alias from '@rollup/plugin-alias';
 
 // import sourceMaps from 'rollup-plugin-sourcemaps';
@@ -67,7 +66,7 @@ export function getRollupConfigs(pkg: PackageOptions) {
   ].filter(Boolean);
 }
 
-function getRollupConfig(options: TsdxOptions) {
+function getRollupConfig(options: PackageOptions) {
   options = {
     ...options,
     minify:
@@ -96,16 +95,16 @@ export function createRollupTask(rollupConfig: any) {
 }
 
 export function createRollupConfig(
-  opts: TsdxOptions
+  pkg: PackageOptions
   // outputNum: number
-): Promise<RollupOptions> {
-  const { presets, plugins, extensions } = babelConfig(opts);
-  return {
+): RollupOptions {
+  const { presets, plugins, extensions } = babelConfig(pkg);
+  const config: RollupOptions = {
     // Tell Rollup the entry point to the package
     // @ts-ignore
-    input: opts.input,
+    input: pkg.input,
     // Tell Rollup which packages to ignore
-    external: (source: string, importer: string) => {
+    external: (source, importer, resolved) => {
       if (source === 'babel-plugin-transform-async-to-promises/helpers') {
         return false;
       } else if (

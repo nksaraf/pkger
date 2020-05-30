@@ -11,7 +11,7 @@ import { Toolbox } from 'gluegun';
 
 import '../extensions/pkger';
 
-function Build() {
+export function Build() {
   const toolbox = useToolbox();
   const manager = useProcessManager();
 
@@ -25,6 +25,9 @@ function Build() {
             running: 'building',
             success: 'built',
             fail: 'failed to build',
+          },
+          onError: (e) => {
+            throw e;
           },
         },
         async () => {
@@ -103,6 +106,7 @@ function ProcessResult({ id }) {
 export default {
   name: 'build',
   run: async (toolbox: Toolbox) => {
+    toolbox.config.debug && console.log('[debug] building...');
     toolbox.ink.render(
       <ProcessManager>
         <Build key={1} />
