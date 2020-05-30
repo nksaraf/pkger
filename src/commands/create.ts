@@ -9,7 +9,7 @@ import Mustache from 'mustache';
 import semver from 'semver';
 // import { Input, Select } from 'enquirer';
 import { isDir, logError } from '../utils';
-import { PackageJson } from '../types';
+// import { PackageJson } from '../types';
 import { GluegunCommand } from 'gluegun';
 export const headerVert = chalk.red(`          __. 
     __.--'   \\
@@ -38,7 +38,7 @@ export let pkgManager: PackageManager;
 
 type PackageManager = 'yarn' | 'npm';
 
-function getNodeEngineRequirement({ engines }: PackageJson) {
+function getNodeEngineRequirement({ engines }: any) {
   return engines && engines.node;
 }
 

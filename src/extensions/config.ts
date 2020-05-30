@@ -142,6 +142,7 @@ export async function createConfig(toolbox: Toolbox): Promise<PackageOptions> {
   });
 
   rootOptions.entries = packages;
+  rootOptions.packages = packages;
   rootOptions.allEntries = allPackages;
   rootOptions.allPackages = allPackages;
   return resolveFormatFromTarget(rootOptions);

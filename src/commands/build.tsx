@@ -36,9 +36,9 @@ export function Build() {
           try {
             await toolbox.filesystem.removeAsync(paths.appDist);
             await config.preBuild(toolbox, config);
-            const tasks = (await toolbox.pkger.build(config)).map(
-              (task) => manager.addTask(task).task
-            );
+            const tasks = toolbox.pkger
+              .build(config)
+              .map((task) => manager.addTask(task).task);
             await toolbox.task.mapParallel(tasks, {
               onError: (e) => {
                 error = e;
