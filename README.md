@@ -17,6 +17,7 @@ Standing on the shoulders of **giants**:
 - Super easy api for multiple entry points
 - Interprets and manages `package.json` (`module`, `exports`, `bin`, `files`, ...)
 - Automatically creates entry points for sub-entries
+- Use internal aliases like `@components`, `@themes` for entry points to code-split (including dynamic imports)
 - Zero-config support for typescript, React and latest ES syntax (powered by Babel)
 - Scaffold command line apps
 - Custom config with a `pkger.config.ts` file or `pkger` entry in `package.json`:
