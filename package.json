@@ -1,6 +1,6 @@
 {
   "name": "pkger",
-  "version": "0.0.2-next.16",
+  "version": "0.0.2",
   "author": "Nikhil Saraf <nsaraf98@gmail.com>",
   "description": "Zero-config TypeScript package development",
   "license": "MIT",
@@ -127,7 +127,9 @@
   "types": "dist/types",
   "files": [
     "dist",
+    "bin",
     "templates",
-    "dist/types"
+    "dist/types",
+    "README.md"
   ]
 }
