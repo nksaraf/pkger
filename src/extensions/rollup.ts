@@ -123,6 +123,7 @@ function transformPackageJsonTask(pkg: PackageOptions, transforms: any[] = []) {
             ensureInFiles(pkg.entryName)
           ),
         ensureInFiles('dist'),
+        ensureInFiles('README.md'),
         ensureInFiles(
           pkg.tsconfigContents.compilerOptions['declarationDir'] || 'dist/types'
         ),
