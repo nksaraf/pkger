@@ -4,6 +4,6 @@ import { runCommand } from '../utils';
 
 export function typescriptTask(pkg: PackageOptions) {
   return createTask('typescript', { taskType: PROCESS.EMIT }, async () => {
-    await runCommand(`tsc -p ${pkg.tsconfig}`);
+    await runCommand(`yarn tsc -p ${pkg.tsconfig}`);
   });
 }

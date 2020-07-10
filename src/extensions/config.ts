@@ -89,6 +89,7 @@ export async function createConfig(toolbox: Toolbox): Promise<PackageOptions> {
         target: 'browser',
         silent: false,
         builder: 'rollup',
+        typecheck: true,
         tasks: {},
         tsconfig,
         debug: DEBUG,

@@ -12,15 +12,13 @@ import presetReact from '@babel/preset-react';
 // babel plugins
 import pluginObjectRestSpread from '@babel/plugin-proposal-object-rest-spread';
 import pluginAsyncToPromise from 'babel-plugin-transform-async-to-promises';
-// import pluginDecorators from '@babel/plugin-proposal-decorators';
 import pluginClassProperties from '@babel/plugin-proposal-class-properties';
 import pluginNullOperator from '@babel/plugin-proposal-nullish-coalescing-operator';
 import pluginOptionalChaining from '@babel/plugin-proposal-optional-chaining';
 import pluginTransformRegen from '@babel/plugin-transform-regenerator';
-// import pluginStyledComponents from 'babel-plugin-styled-components';
 import pluginMacros from 'babel-plugin-macros';
 import { Toolbox, GluegunToolbox } from 'gluegun';
-import { PackageOptions } from "../types";
+import { PackageOptions } from '../types';
 
 let hasReact = (pkg: PackageOptions) =>
   ['dependencies', 'devDependencies', 'peerDependencies'].reduce(
@@ -67,13 +65,11 @@ export const babelConfig = (pkg: PackageOptions) => {
 
   const plugins = [
     [pluginObjectRestSpread, { loose: true, useBuiltIns: true }],
-    [pluginAsyncToPromise, { inlineHelpers: true, externalHelpers: true }],
-    // [pluginDecorators, { legacy: true }],
+    [pluginAsyncToPromise, { inlineHelpers: true }],
     [pluginClassProperties, { loose: true }],
     [pluginTransformRegen, { async: false }],
     [pluginNullOperator],
     [pluginOptionalChaining],
-    // pluginStyledComponents,
     [pluginMacros],
   ];
 

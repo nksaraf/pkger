@@ -165,44 +165,44 @@ const cjsEntryTask: TaskPlugin = (pkg) => {
 };
 
 const subPackageFolderTask: TaskPlugin = (pkg) => {
-  return (
-    !pkg.root &&
-    pkg.target !== 'cli' &&
-    createTask(
-      str(pkg.name, 'package.json'),
-      { taskType: PROCESS.FIX },
-      async () => {
-        fs.mkdirp(path.join(process.cwd(), pkg.entryName));
-        const packageJson = {
-          name: pkg.name,
-          private: true,
-          ...(pkg.format.includes('cjs')
-            ? {
-                main: getRelativePath(
-                  path.join(process.cwd(), pkg.entryName),
-                  getOutputPath({ ...pkg, outputFormat: 'cjs' })
-                ),
-              }
-            : {}),
-          ...(pkg.format.includes('esm')
-            ? {
-                module: getRelativePath(
-                  path.join(process.cwd(), pkg.entryName),
-                  getOutputPath({ ...pkg, outputFormat: 'esm' })
-                ),
-              }
-            : {}),
-          types:
-            '../' +
-            (pkg.tsconfigContents.compilerOptions['declarationDir'] ||
-              'dist/types'),
-        };
-        await fs.writeFile(
-          path.join(process.cwd(), pkg.entryName, 'package.json'),
-          JSON.stringify(packageJson, null, 2)
-        );
-      }
-    )
+  if (pkg.root || pkg.target === 'cli') {
+    return null;
+  }
+
+  return createTask(
+    str(pkg.name, 'package.json'),
+    { taskType: PROCESS.FIX },
+    async () => {
+      fs.mkdirp(path.join(process.cwd(), pkg.entryName));
+      const packageJson = {
+        name: pkg.name,
+        private: true,
+        ...(pkg.format.includes('cjs')
+          ? {
+              main: getRelativePath(
+                path.join(process.cwd(), pkg.entryName),
+                getOutputPath({ ...pkg, outputFormat: 'cjs' })
+              ),
+            }
+          : {}),
+        ...(pkg.format.includes('esm')
+          ? {
+              module: getRelativePath(
+                path.join(process.cwd(), pkg.entryName),
+                getOutputPath({ ...pkg, outputFormat: 'esm' })
+              ),
+            }
+          : {}),
+        types:
+          '../' +
+          (pkg.tsconfigContents.compilerOptions['declarationDir'] ||
+            path.join('dist/types', pkg.entryName)),
+      };
+      await fs.writeFile(
+        path.join(process.cwd(), pkg.entryName, 'package.json'),
+        JSON.stringify(packageJson, null, 2)
+      );
+    }
   );
 };
 
